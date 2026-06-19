@@ -42,7 +42,7 @@ function CreatorShell() {
     <AppShell
       sidebar={
         <Sidebar
-          onHome={() => navigate('/library')}
+          onHome={() => navigate('/')}
           onNewPoll={() => navigate('/build')}
           onVoiceNew={() => navigate('/voice')}
           navItems={navItems}

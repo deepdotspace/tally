@@ -1,4 +1,3 @@
-import { useLayoutEffect, useRef, useState } from 'react'
 import type { RecordData } from 'deepspace'
 import { Eye, EyeOff, Lock, Unlock, RotateCcw, Smartphone, Square, ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react'
 import { ResultsView } from '../results'
@@ -83,55 +82,17 @@ export interface PresenterViewProps {
   busy?: string | null
 }
 
-const QUESTION_LINE_HEIGHT = 1.06
-
 /*
- * Auto-fit the projected question. Rather than crude length buckets, measure the
- * text and pick the largest font (within a cap that scales with the stage so a
- * big projector reads bigger than a laptop) at which it still fits in a few lines
- * without overflowing its column. Short questions read big and bold; long ones
- * scale down gracefully, so the question never dwarfs the room or the results.
+ * Projected question size: deterministic and length-aware. Short questions read
+ * big and bold; longer ones step down so they stay readable without dwarfing the
+ * results. The `cqi` unit tracks the stage container, so a projector reads bigger
+ * than a laptop, clamped both ends. No DOM measurement, so no font-load flicker
+ * or stale sizing (the bug a measure-based fit had).
  */
-function useFitQuestion(text: string, maxLines = 3) {
-  const ref = useRef<HTMLHeadingElement>(null)
-  const [fontSize, setFontSize] = useState(56)
-
-  useLayoutEffect(() => {
-    const el = ref.current
-    const stage = el?.closest('main')
-    if (!el || !stage) return
-
-    const fit = () => {
-      // Cap grows with the stage height so a projector reads bigger than a laptop,
-      // but stays modest on a desktop (a short question lands ~60-68px at 900p).
-      const cap = Math.max(30, Math.min(stage.clientHeight * 0.085, 112))
-      const min = 26
-      let lo = min
-      let hi = Math.max(min, cap)
-      let best = min
-      for (let i = 0; i < 9; i++) {
-        const mid = (lo + hi) / 2
-        el.style.fontSize = `${mid}px`
-        const fitsHeight = el.scrollHeight <= maxLines * mid * QUESTION_LINE_HEIGHT + 1
-        const fitsWidth = el.scrollWidth <= el.clientWidth + 1
-        if (fitsHeight && fitsWidth) {
-          best = mid
-          lo = mid
-        } else {
-          hi = mid
-        }
-      }
-      el.style.fontSize = ''
-      setFontSize(Math.floor(best))
-    }
-
-    fit()
-    const ro = new ResizeObserver(fit)
-    ro.observe(stage)
-    return () => ro.disconnect()
-  }, [text, maxLines])
-
-  return { ref, fontSize }
+function questionFontSize(question: string): string {
+  const len = question.trim().length
+  const scale = len <= 16 ? 1 : len <= 32 ? 0.82 : len <= 60 ? 0.66 : len <= 100 ? 0.54 : 0.46
+  return `clamp(36px, ${(scale * 6.4).toFixed(2)}cqi, 76px)`
 }
 
 export function PresenterView(props: PresenterViewProps) {
@@ -139,7 +100,7 @@ export function PresenterView(props: PresenterViewProps) {
   const { deckName, revealed, locked, panel, questionIndex, questionTotal } = props
   const question = poll.title
   const joinUrl = `https://${host}/v/${code}`
-  const { ref: questionRef, fontSize: questionSize } = useFitQuestion(question)
+  const questionSize = questionFontSize(question)
   const hasDeck = questionIndex != null && questionTotal != null && questionTotal > 1
   // Votable types stay hidden until reveal; cloud / Q&A / ranking always show live.
   const hidden = HIDES_UNTIL_REVEAL.has(poll.type) && !revealed
@@ -160,9 +121,8 @@ export function PresenterView(props: PresenterViewProps) {
               {/* Left: oversized question + the animating result body. */}
               <div className="flex min-h-0 flex-col">
                 <h1
-                  ref={questionRef}
                   className="flex-none font-display font-extrabold tracking-[-0.025em] text-text-1"
-                  style={{ fontSize: `${questionSize}px`, lineHeight: QUESTION_LINE_HEIGHT, textWrap: 'balance' }}
+                  style={{ fontSize: questionSize, lineHeight: 1.06, textWrap: 'balance' }}
                 >
                   {question}
                 </h1>
