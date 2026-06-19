@@ -7,7 +7,7 @@
 import { useMemo } from 'react'
 import { useQuery, useUser } from 'deepspace'
 import type { Poll, Session, Deck } from '../../types'
-import { NO_MATCH } from '../../lib/poll-data'
+import { NO_MATCH, sessionActive } from '../../lib/poll-data'
 
 export interface PollRow {
   id: string
@@ -35,9 +35,11 @@ export function useCreatorPolls() {
   })
 
   const rows = useMemo<PollRow[]>(() => {
+    // Only a recently-beating session counts as live; a stale one reads as draft.
     const byPoll = new Map<string, { id: string; data: Session }>()
     for (const r of liveQ.records) {
       const s = r.data
+      if (!sessionActive(s)) continue
       const key = s.pollId || s.currentPollId
       if (key) byPoll.set(key, { id: r.recordId, data: s })
     }
@@ -59,7 +61,8 @@ export function usePollSession(pollId: string | undefined, ownerId: string) {
   const liveQ = useQuery<Session>('sessions', {
     where: pollId && ownerId ? { hostId: ownerId, pollId, state: 'live' } : { recordId: NO_MATCH },
   })
-  const rec = liveQ.records[0]
+  // Only resume a genuinely active session; a stale one is treated as none.
+  const rec = liveQ.records.find((r) => sessionActive(r.data))
   return { sessionId: rec?.recordId ?? null, session: rec?.data ?? null, status: liveQ.status }
 }
 
@@ -74,9 +77,10 @@ export function useCreatorDecks() {
   })
 
   const rows = useMemo<DeckRow[]>(() => {
+    // Only a recently-beating session counts as live; a stale one reads as draft.
     const byDeck = new Map<string, { id: string; data: Session }>()
     for (const r of liveQ.records) {
-      if (r.data.deckId) byDeck.set(r.data.deckId, { id: r.recordId, data: r.data })
+      if (r.data.deckId && sessionActive(r.data)) byDeck.set(r.data.deckId, { id: r.recordId, data: r.data })
     }
     return decksQ.records.map((r) => ({ id: r.recordId, deck: r.data, session: byDeck.get(r.recordId) ?? null }))
   }, [decksQ.records, liveQ.records])
@@ -89,6 +93,7 @@ export function useDeckSession(deckId: string | undefined, ownerId: string) {
   const liveQ = useQuery<Session>('sessions', {
     where: deckId && ownerId ? { hostId: ownerId, deckId, state: 'live' } : { recordId: NO_MATCH },
   })
-  const rec = liveQ.records[0]
+  // Only resume a genuinely active session; a stale one is treated as none.
+  const rec = liveQ.records.find((r) => sessionActive(r.data))
   return { sessionId: rec?.recordId ?? null, session: rec?.data ?? null, status: liveQ.status }
 }

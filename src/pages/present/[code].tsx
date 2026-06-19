@@ -12,7 +12,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useQuery } from 'deepspace'
+import { useQuery, useUser } from 'deepspace'
+import { config } from '../../config'
 import { PresenterView } from '../../components/presenter'
 import type { PresenterPanel } from '../../components/presenter/PresenterView'
 import type { AiStatus, AiTheme } from '../../components/presenter'
@@ -32,7 +33,9 @@ export default function PresentCodePage() {
   const upper = code.toUpperCase()
   const navigate = useNavigate()
 
+  const { user } = useUser()
   const { sessionId, session, status: sessionStatus } = useSessionByCode(upper)
+  const isHost = !!user && !!session && session.hostId === user.id
   // A deck advances currentPollId; a single-poll session uses pollId.
   const activePollId = session?.currentPollId || session?.pollId
   const { poll, status: pollStatus } = usePoll(activePollId)
@@ -74,6 +77,15 @@ export default function PresentCodePage() {
     lockFired.current = true
     void callAction('lockSession', { sessionId, locked: true })
   }, [remaining, sessionId, session])
+
+  // Host heartbeat: an open presenter tab refreshes lastSeenAt so the session
+  // stays active. Beats on mount, then on the config interval; clears on unmount.
+  useEffect(() => {
+    if (!sessionId || !isHost) return
+    void callAction('heartbeatSession', { sessionId })
+    const id = setInterval(() => void callAction('heartbeatSession', { sessionId }), config.session.heartbeatMs)
+    return () => clearInterval(id)
+  }, [sessionId, isHost])
 
   // Run a host action behind a per-key busy guard (non-host calls 403 server-side).
   async function run(key: string, name: string, params: Record<string, unknown>) {

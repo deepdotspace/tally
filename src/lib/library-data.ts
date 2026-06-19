@@ -9,7 +9,7 @@ import { useMemo } from 'react'
 import { useQuery, useUser } from 'deepspace'
 import type { RecordData } from 'deepspace'
 import type { Poll, Session, Response, Upvote, Deck } from '../types'
-import { NO_MATCH } from './poll-data'
+import { NO_MATCH, sessionActive } from './poll-data'
 import { useCreatorDecks, useCreatorPolls } from '../components/creator/useCreatorData'
 import { typeMeta } from '../components/creator/typeMeta'
 
@@ -43,16 +43,19 @@ export interface ClosedSessionRow {
 }
 
 /**
- * The host's past (closed) sessions, newest first by closedAt. Participant and
- * poll counts are derived: participants = distinct deviceIds across the session's
- * responses; pollCount = the deck's poll count (or 1 for a single-poll session).
+ * The host's OVER sessions: explicitly closed, plus abandoned live ones (state
+ * 'live' but stale by the recency model, so results are not lost). Newest first
+ * by endedAt (closedAt || lastSeenAt || startedAt). Counts are derived:
+ * participants = distinct deviceIds; pollCount = deck poll count (or 1).
  */
 export function useClosedSessions(): { rows: ClosedSessionRow[]; status: string } {
   const { user } = useUser()
   const ownerId = user?.id ?? ''
 
+  // The `where` builder is equality-only, so query all the host's sessions and
+  // keep the over ones (closed or stale-live) in memory.
   const sessionsQ = useQuery<Session>('sessions', {
-    where: ownerId ? { hostId: ownerId, state: 'closed' } : { recordId: NO_MATCH },
+    where: ownerId ? { hostId: ownerId } : { recordId: NO_MATCH },
   })
   // Responses have no host column, so we read the stream and keep only this
   // host's closed-session rows in memory (responses are public-read already).
@@ -60,28 +63,31 @@ export function useClosedSessions(): { rows: ClosedSessionRow[]; status: string 
   const decksQ = useQuery<Deck>('decks', { where: ownerId ? { ownerId } : { recordId: NO_MATCH } })
 
   const rows = useMemo<ClosedSessionRow[]>(() => {
-    const closed = sessionsQ.records
-    const closedIds = new Set(closed.map((r) => r.recordId))
-    // distinct deviceIds per session (only for the host's closed sessions).
+    // Over = explicitly closed, or live but abandoned (stale). Active live ones are excluded.
+    const over = sessionsQ.records.filter((r) => r.data.state === 'closed' || !sessionActive(r.data))
+    const overIds = new Set(over.map((r) => r.recordId))
+    // distinct deviceIds per session (only for the host's over sessions).
     const devices = new Map<string, Set<string>>()
     for (const r of responsesQ.records) {
       const sid = r.data.sessionId
-      if (!closedIds.has(sid)) continue
+      if (!overIds.has(sid)) continue
       let set = devices.get(sid)
       if (!set) devices.set(sid, (set = new Set()))
       if (r.data.deviceId) set.add(r.data.deviceId)
     }
     const deckById = new Map(decksQ.records.map((d) => [d.recordId, d.data]))
-    return closed
+    return over
       .map((r) => {
         const s = r.data
         const deck = s.deckId ? deckById.get(s.deckId) : undefined
         const pollCount = deck ? deck.pollIds.length : s.pollId ? 1 : 0
+        // Abandoned sessions never stamped closedAt; fall back to the last beat, then open time.
+        const endedAt = s.closedAt || s.lastSeenAt || s.startedAt
         return {
           sessionId: r.recordId,
           name: s.name || deck?.title || '',
-          closedAt: s.closedAt,
-          dateLabel: formatSessionDate(s.closedAt),
+          closedAt: endedAt,
+          dateLabel: formatSessionDate(endedAt),
           deckId: s.deckId,
           pollCount,
           participantCount: devices.get(r.recordId)?.size ?? 0,

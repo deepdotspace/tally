@@ -20,6 +20,7 @@ export const sessionsSchema: CollectionSchema = {
     { name: 'hostId', storage: 'text', interpretation: 'plain', required: true, userBound: true, immutable: true },
     { name: 'startedAt', storage: 'number', interpretation: 'plain', default: 0 },
     { name: 'closedAt', storage: 'number', interpretation: 'plain', default: 0 },
+    { name: 'lastSeenAt', storage: 'number', interpretation: 'plain', default: 0 },
     { name: 'askNames', storage: 'number', interpretation: 'plain', default: 0 },
     { name: 'moderateQa', storage: 'number', interpretation: 'plain', default: 0 },
     { name: 'pollStartedAt', storage: 'number', interpretation: 'plain', default: 0 },

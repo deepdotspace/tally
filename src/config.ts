@@ -69,6 +69,15 @@ export const config = {
     revealMode: 'manual',
   } satisfies PollSettings,
 
+  /**
+   * Live-session recency model. The presenter beats `heartbeatMs`; a session is
+   * stale (abandoned) once `activeTimeoutMs` passes with no beat (~2 missed beats).
+   */
+  session: {
+    heartbeatMs: 60_000,
+    activeTimeoutMs: 120_000,
+  },
+
   /** Scale / NPS / numeric bounds used when a poll does not set its own. */
   ranges: {
     scaleMin: 1,

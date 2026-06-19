@@ -82,6 +82,8 @@ export interface Session {
   hostId: string
   startedAt: number
   closedAt: number
+  /** ms of the last host heartbeat; recency model uses it to detect abandoned sessions. */
+  lastSeenAt: number
   /** 0 off, 1 collect + show participant names. */
   askNames: number
   /** 0 off, 1 hold all Q&A questions for host approval (session-wide override). */

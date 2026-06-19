@@ -24,6 +24,7 @@ function makeSession(over: Partial<Session> = {}): Session {
     hostId: 'host',
     startedAt: NOW,
     closedAt: 0,
+    lastSeenAt: NOW,
     askNames: 0,
     moderateQa: 0,
     pollStartedAt: NOW,

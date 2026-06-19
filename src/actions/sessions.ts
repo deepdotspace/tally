@@ -100,6 +100,7 @@ export const createSession: ActionHandler<Env> = async ({ userId, params, tools 
     hostId: userId,
     startedAt: Date.now(),
     closedAt: 0,
+    lastSeenAt: Date.now(),
     askNames,
     moderateQa,
     pollStartedAt: Date.now(),
@@ -139,6 +140,7 @@ export const advanceDeck: ActionHandler<Env> = async ({ userId, params, tools })
     resultsRevealed: revealedOnOpen(nextPoll?.settings ?? config.defaults),
     locked: 0,
     pollStartedAt: Date.now(),
+    lastSeenAt: Date.now(),
   })
 }
 
@@ -251,7 +253,14 @@ export const resetPoll: ActionHandler<Env> = async ({ userId, params, tools }) =
     const removed = await tools.remove('responses', row.recordId)
     if (!removed.success) return removed
   }
-  return patchRecord<Session>(tools, 'sessions', sessionId, { locked: 0, pollStartedAt: Date.now() })
+  return patchRecord<Session>(tools, 'sessions', sessionId, { locked: 0, pollStartedAt: Date.now(), lastSeenAt: Date.now() })
+}
+
+/** Refresh the host heartbeat so the presenter's open tab keeps the session active (recency model). */
+export const heartbeatSession: ActionHandler<Env> = async ({ userId, params, tools }) => {
+  const sessionId = String(params.sessionId ?? '')
+  if (!(await loadHostSession(tools, sessionId, userId))) return { success: false, error: 'Forbidden' }
+  return patchRecord<Session>(tools, 'sessions', sessionId, { lastSeenAt: Date.now() })
 }
 
 /** Close a session: stop accepting votes, stamp closedAt. An onClose poll reveals on close. */

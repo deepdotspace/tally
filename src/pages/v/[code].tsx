@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useMutations } from 'deepspace'
 import {
   useSessionByCode, usePoll, useResponses, useCastVote, useUpvotes, useUpvote,
-  rankingToText, resultsVisibleToVoters, votingLocked, timerRemaining, isModerated, NO_MATCH,
+  rankingToText, resultsVisibleToVoters, votingLocked, timerRemaining, isModerated, sessionActive, NO_MATCH,
 } from '../../lib/poll-data'
 import { useDeviceId } from '../../lib/useDeviceId'
 import { useParticipantName } from '../../lib/useParticipantName'
@@ -271,6 +271,8 @@ function resolvePhase({ sessionStatus, session, poll, hasVoted, needsName }: Pha
   if (sessionStatus !== 'ready' && !session) return 'loading'
   if (!session) return 'not-found'
   if (session.state === 'closed') return 'closed'
+  // A live session whose host stopped beating is abandoned: voters see it as ended.
+  if (!sessionActive(session)) return 'closed'
   if (!poll) return 'loading'
   if (votingLocked(session)) return 'locked'
   if (needsName) return 'name'

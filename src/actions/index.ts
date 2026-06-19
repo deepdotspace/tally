@@ -7,6 +7,7 @@ import {
   lockSession,
   resetPoll,
   closeSession,
+  heartbeatSession,
   setResponseApproved,
   setSessionModeration,
   reorderDeck,
@@ -24,6 +25,8 @@ export const actions: Record<string, ActionHandler<Env>> = {
   lockSession,
   resetPoll,
   closeSession,
+  // Presenter heartbeat: an open presenter tab keeps the session active (recency model)
+  heartbeatSession,
   // Deck editing: reorder polls within a deck; clone a deck + its polls (Run again)
   reorderDeck,
   cloneDeck,

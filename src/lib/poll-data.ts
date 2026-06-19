@@ -8,6 +8,7 @@
 import { useQuery, useMutations } from 'deepspace'
 import type { RecordData } from 'deepspace'
 import { useDeviceId } from './useDeviceId'
+import { config } from '../config'
 import type { Poll, Session, Response, Upvote } from '../types'
 import type { ResultOption } from '../components/results/types'
 
@@ -27,6 +28,14 @@ export function resultsVisibleToVoters(session: Session | null, poll: Poll | nul
 /** Whether voting is locked on the current poll. */
 export function votingLocked(session: Session | null): boolean {
   return session?.locked === 1
+}
+
+/**
+ * Whether a session is genuinely live: state 'live' AND the host heartbeat is
+ * recent. A stale (abandoned) session reads as not-active everywhere.
+ */
+export function sessionActive(s: Session | null): boolean {
+  return !!s && s.state === 'live' && Date.now() - (s.lastSeenAt || 0) < config.session.activeTimeoutMs
 }
 
 /** Whether Q&A questions need host approval before showing: per-poll setting OR the session-wide flag. */
