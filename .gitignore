@@ -1,0 +1,21 @@
+node_modules
+dist
+.wrangler
+.dev.vars
+.deepspace
+.worker-bundle.js
+*.tgz
+
+# Founder coordination wiki — local-only build brain, never committed
+docs/
+
+# Playwright artifacts
+test-results/
+playwright-report/
+
+# Agent tooling + build-process docs — not part of the shipped app
+.agents/
+.claude/
+skills-lock.json
+CLAUDE.md
+AGENTS.md

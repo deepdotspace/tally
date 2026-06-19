@@ -1,0 +1,12 @@
+/* Creator surfaces — builder pieces for the v2 IA. */
+export { useCreatorPolls, usePollSession, useCreatorDecks, useDeckSession } from './useCreatorData'
+export type { PollRow, DeckRow } from './useCreatorData'
+export { SegmentedToggle } from './SegmentedToggle'
+export { OptionChips } from './OptionChips'
+export { TypeGrid } from './TypeGrid'
+export { TypeGlyph } from './TypeGlyph'
+export { PreviewCard } from './PreviewCard'
+export { typeMeta, TYPE_META, TYPE_ORDER } from './typeMeta'
+export type { TypeMeta } from './typeMeta'
+export { ScaleFields, NumericFields, QuizOptions } from './PerTypeFields'
+export { AiGenerate } from './AiGenerate'

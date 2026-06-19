@@ -1,0 +1,184 @@
+/*
+ * Tally theme tokens. The authoring app (sidebar, Library, Deck, Builder,
+ * History, Session, Voice chrome) is LIGHT-primary; DARK is scoped to the
+ * projection, voter phone, and voice recording stage. Mode is set via
+ * `data-theme="light" | "dark"` on <html>; default is light. Token names
+ * (--bg-*, --border-*, --text-*, --accent-*) carry the prototype hexes
+ * (PROTOTYPE-MAP section 1) so components resolve automatically.
+ */
+
+/* ── Constant tokens (shared across both modes) ──────────────────────── */
+:root {
+  /* Faces + display treatment */
+  --font-display: "Archivo", sans-serif;
+  --font-ui: "Hanken Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --display-weight: 800;
+  --display-spacing: -0.02em;
+  --label-transform: uppercase;
+  --label-spacing: 0.16em;
+
+  /* Geometry */
+  --radius: 9px;
+}
+
+/* ── Light (PRIMARY): app chrome (PROTOTYPE-MAP section 1.1 light palette) ── */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Background world — flat page canvas, white surfaces, neutral insets. */
+  --bg-0: #eef0f3;
+  --bg-1: #eef0f3;
+  --bg-2: #ffffff;
+  --bg-3: #f1f3f6;
+  --bg-4: #ffffff;
+  --bg-sel: #f1f3f6;
+  --bg-nav: #ffffff;
+  --bg-track: #eaedf1;
+  --bg-card-a: #ffffff;
+  --bg-card-b: #ffffff;
+  --surface: #ffffff;
+  --bg-subtle: #fafbfc;
+  --bg-muted: #f1f3f6;
+  --bg-muted-2: #eef1f4;
+  --bg-muted-3: #f4f6f8;
+
+  /* Borders + insets */
+  --border: #e6e9ed;
+  --border-2: #f1f3f6;
+  --border-2b: #ebeef1;
+  --border-3: #e0e4e9;
+  --border-4: #dce0e6;
+  --border-5: #dce0e6;
+  --border-6: #cfd5dd;
+  --border-7: #bfc6cf;
+  --border-strong: #dce0e6;
+  --dot-muted: #cdd3db;
+
+  /* Text ladder */
+  --text-1: #15191f;
+  --text-1b: #1e232b;
+  --text-2: #5a646f;
+  --text-2b: #5a646f;
+  --text-3: #8a929c;
+  --text-3b: #8a929c;
+  --text-4: #a6aeb8;
+  --text-5: #a6aeb8;
+  --text-6: #c0c7d0;
+  --text-7: #dce0e6;
+
+  /* Accent (deeper sky blue for white surfaces) */
+  --accent: #1e86f0;
+  --accent-hover: #1577dd;
+  --accent-text: #ffffff;
+  --accent-tint: #eaf3fe;
+  --accent-tint-2: #f7fbff;
+  --accent-tint-hover: #dcebfd;
+  --accent-soft: rgba(30, 134, 240, 0.07);
+  --accent-soft-2: rgba(30, 134, 240, 0.12);
+  --accent-border-soft: rgba(30, 134, 240, 0.25);
+
+  /* Data + signal */
+  --data-2: #afbac6;
+  --data-muted: #c8d0da;
+  --live: #ff6a4d;
+  --chip-bg: #f1f3f6;
+
+  /* Status / semantic */
+  --correct: #3ec98a;
+  --danger: #e5533a;
+  --danger-bg: #fdece8;
+  --danger-border: #f0b3a6;
+  --status-draft: #7a8794;
+  --status-closed: #9aa3ae;
+  --mic-note-bg: #fff6ec;
+  --mic-note-border: #f3dfc0;
+  --mic-note-text: #8a6a3a;
+  --end-bg: #2a1714;
+  --end-border: #5a2a20;
+  --end-text: #ff8a6e;
+
+  /* Elevation */
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 14px 36px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Dark: projection / voter phone / voice stage / landing (section 1.1 dark) ── */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Background world (darkest -> lightest) */
+  --bg-0: #0a0c0f;
+  --bg-1: #0d1015;
+  --bg-2: #0e1217;
+  --bg-3: #161b22;
+  --bg-4: #1a1f26;
+  --bg-sel: #13171d;
+  --bg-nav: #0c0e12;
+  --bg-track: #14181e;
+  --bg-card-a: #11151a;
+  --bg-card-b: #12161b;
+  --surface: #0e1217;
+  --bg-subtle: #0d1015;
+  --bg-muted: #14181e;
+  --bg-muted-2: #161b22;
+  --bg-muted-3: #12161b;
+
+  /* Borders */
+  --border: #1b2029;
+  --border-2: #1b2029;
+  --border-2b: #1c2128;
+  --border-3: #1f252d;
+  --border-4: #222a33;
+  --border-5: #232a33;
+  --border-6: #252d37;
+  --border-7: #2a323c;
+  --border-strong: #2a323c;
+  --dot-muted: #2a313b;
+
+  /* Text */
+  --text-1: #f2f5f8;
+  --text-1b: #e4e8ec;
+  --text-2: #dde2e7;
+  --text-2b: #c2c9d1;
+  --text-3: #a6aeb8;
+  --text-3b: #9aa3ae;
+  --text-4: #8a929c;
+  --text-5: #646d78;
+  --text-6: #5a636e;
+  --text-7: #4a535e;
+
+  /* Accent (sky blue owns the data; near-black glyph on it) */
+  --accent: #4fb0ff;
+  --accent-hover: #6fbeff;
+  --accent-text: #06121e;
+  --accent-tint: #14181e;
+  --accent-tint-2: #12161b;
+  --accent-tint-hover: #161b22;
+  --accent-soft: rgba(79, 176, 255, 0.1);
+  --accent-soft-2: rgba(79, 176, 255, 0.14);
+  --accent-border-soft: rgba(79, 176, 255, 0.3);
+
+  /* Data + signal */
+  --data-2: #3a4250;
+  --data-muted: #2a3038;
+  --live: #ff6a4d;
+  --chip-bg: #14181e;
+
+  /* Status / semantic */
+  --correct: #3ec98a;
+  --danger: #e5533a;
+  --danger-bg: #fdece8;
+  --danger-border: #f0b3a6;
+  --status-draft: #7a8794;
+  --status-closed: #9aa3ae;
+  --mic-note-bg: #fff6ec;
+  --mic-note-border: #f3dfc0;
+  --mic-note-text: #8a6a3a;
+  --end-bg: #2a1714;
+  --end-border: #5a2a20;
+  --end-text: #ff8a6e;
+
+  /* Elevation */
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 14px 40px rgba(0, 0, 0, 0.5);
+}

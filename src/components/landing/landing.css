@@ -1,0 +1,38 @@
+/*
+ * Landing motion. Scoped to the marketing page and imported only by the lazy
+ * Landing module, so these keyframes stay out of the signed-in app bundle.
+ * Values match the prototype (Tally Landing.dc.html). Under reduced-motion the
+ * looping ambient animations stop; scroll reveals fall back to visible.
+ */
+
+@keyframes tlyBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+@keyframes tlyHeroSlide { from { transform: translateY(15px); } to { transform: none; } }
+@keyframes tlyPing {
+  0% { transform: translateY(0) scale(0.7); opacity: 0; }
+  14% { opacity: 1; }
+  70% { opacity: 0.6; }
+  100% { transform: translateY(-150px) scale(0.5); opacity: 0; }
+}
+@keyframes tlyFloat { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(-3deg); } }
+@keyframes tlyTap { 0%, 78%, 100% { transform: scale(1); } 86% { transform: scale(0.94); } }
+@keyframes tlyRipple { 0% { transform: scale(0.5); opacity: 0.55; } 100% { transform: scale(2.4); opacity: 0; } }
+@keyframes tlySheen { 0% { transform: translateX(-120%); } 60%, 100% { transform: translateX(320%); } }
+@keyframes tlyDrift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(0, -26px); } }
+@keyframes tlySpin { to { transform: rotate(360deg); } }
+@keyframes tlyBreathe { 0%, 100% { transform: scaleX(0.5); } 50% { transform: scaleX(1); } }
+@keyframes tlyCaret { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes tlyWordPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+.tly-land { color: #f2f5f8; font-family: "Hanken Grotesk", sans-serif; }
+.tly-land a { color: inherit; text-decoration: none; transition: color 0.15s ease; }
+.tly-land a:hover { color: #f2f5f8; }
+
+/* Hover affordances mirroring the prototype's style-hover attributes. */
+.tly-navlink { transition: color 0.15s ease; }
+.tly-navlink:hover { color: #f2f5f8 !important; }
+.tly-land button { transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tly-land [class*="tly-anim"],
+  .tly-land .tly-anim { animation: none !important; }
+}

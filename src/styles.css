@@ -1,0 +1,275 @@
+@import "tailwindcss" source(none);
+@import "./themes.css";
+
+/* Scan local source + SDK components for Tailwind class usage */
+@source "./**/*.{ts,tsx}";
+@source "../node_modules/deepspace/dist/**/*.js";
+
+/*
+ * Tally design tokens -> Tailwind v4 utilities.
+ *
+ * Color values live in themes.css per mode ([data-theme]). Here we register
+ * each token as a Tailwind color/var so utilities like `bg-bg-1`, `text-text-2`,
+ * `border-border`, `text-accent` are generated and resolve to the live CSS
+ * variable (so they re-theme at runtime). Foundation is the cloud design (§7).
+ *
+ * `inline` is REQUIRED: it makes each utility reference the underlying
+ * `var(--bg-0)` directly instead of a `--color-bg-0` alias frozen at :root.
+ * Without it, a nested `[data-theme="dark"]` subtree (presenter, voter, voice)
+ * inherits the light-substituted alias and renders light. Inline re-resolves
+ * the token per subtree, so dark surfaces theme correctly.
+ */
+@theme inline {
+  /* Backgrounds */
+  --color-bg-0: var(--bg-0);
+  --color-bg-1: var(--bg-1);
+  --color-bg-2: var(--bg-2);
+  --color-bg-3: var(--bg-3);
+  --color-bg-4: var(--bg-4);
+  --color-bg-sel: var(--bg-sel);
+  --color-bg-nav: var(--bg-nav);
+  --color-bg-track: var(--bg-track);
+  --color-bg-card-a: var(--bg-card-a);
+  --color-bg-card-b: var(--bg-card-b);
+
+  /* Borders */
+  --color-border: var(--border);
+  --color-border-2: var(--border-2);
+  --color-border-2b: var(--border-2b);
+  --color-border-3: var(--border-3);
+  --color-border-4: var(--border-4);
+  --color-border-5: var(--border-5);
+  --color-border-6: var(--border-6);
+  --color-border-7: var(--border-7);
+  --color-dot-muted: var(--dot-muted);
+
+  /* Text */
+  --color-text-1: var(--text-1);
+  --color-text-1b: var(--text-1b);
+  --color-text-2: var(--text-2);
+  --color-text-2b: var(--text-2b);
+  --color-text-3: var(--text-3);
+  --color-text-3b: var(--text-3b);
+  --color-text-4: var(--text-4);
+  --color-text-5: var(--text-5);
+  --color-text-6: var(--text-6);
+  --color-text-7: var(--text-7);
+
+  /* Surfaces + insets */
+  --color-surface: var(--surface);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-bg-muted: var(--bg-muted);
+  --color-bg-muted-2: var(--bg-muted-2);
+  --color-bg-muted-3: var(--bg-muted-3);
+  --color-border-strong: var(--border-strong);
+
+  /* Accent */
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-text: var(--accent-text);
+  --color-accent-tint: var(--accent-tint);
+  --color-accent-tint-2: var(--accent-tint-2);
+  --color-accent-tint-hover: var(--accent-tint-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-2: var(--accent-soft-2);
+  --color-accent-border-soft: var(--accent-border-soft);
+
+  /* Data + signal */
+  --color-data-2: var(--data-2);
+  --color-data-muted: var(--data-muted);
+  --color-live: var(--live);
+  --color-chip-bg: var(--chip-bg);
+
+  /* Status / semantic */
+  --color-correct: var(--correct);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
+  --color-status-draft: var(--status-draft);
+  --color-status-closed: var(--status-closed);
+  --color-mic-note-bg: var(--mic-note-bg);
+  --color-mic-note-border: var(--mic-note-border);
+  --color-mic-note-text: var(--mic-note-text);
+  --color-end-bg: var(--end-bg);
+  --color-end-border: var(--end-border);
+  --color-end-text: var(--end-text);
+
+  /* Presenter type scale (§1.1) — Space Grotesk 700 / -0.02em, fluid. */
+  --text-pt-question-xl: clamp(48px, 7vw, 132px);
+  --text-pt-question: clamp(36px, 5vw, 88px);
+  --text-pt-question-sm: clamp(28px, 3.4vw, 60px);
+  --text-pt-option: clamp(22px, 2.6vw, 44px);
+  --text-pt-count: clamp(28px, 3.2vw, 56px);
+  --text-pt-pct: clamp(20px, 2.2vw, 38px);
+  --text-pt-code: clamp(40px, 6vw, 96px);
+  --text-pt-eyebrow: clamp(14px, 1.4vw, 22px);
+
+  /* Faces — concrete stacks so Tailwind emits `font-display`/`font-ui`/`font-mono`. */
+  --font-display: "Archivo", sans-serif;
+  --font-ui: "Hanken Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Keyframe-driven animations (defined below). */
+  --animate-rs-spin: rs-spin 1s linear infinite;
+  --animate-rs-shimmer: rs-shimmer 1.3s linear infinite;
+  --animate-rs-in: rs-in 0.18s ease;
+  --animate-rs-toast: rs-toast 0.22s ease;
+  --animate-rs-pulse: rs-pulse 1.6s ease-in-out infinite;
+  --animate-tly-tick: tly-tick 0.18s ease-out;
+  --animate-tly-enter: tly-enter 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-tly-pop: tlyPop 0.2s ease;
+
+  /* Cloud motion (TALLY-DESIGN §4.1) — entry, pulse, and the LIVE blink. */
+  --animate-tly-fade-up: tlyFadeUp 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-tly-pulse: tlyPulse 1.6s ease-in-out infinite;
+  --animate-tly-blink: tlyBlink 1.6s ease-in-out infinite;
+
+  /*
+   * Backward-compat: shadcn-style color tokens mapped onto Tally tokens so
+   * scaffold primitives (Toast, Dialog, etc.) keep rendering in Tally colors.
+   * New Tally UI uses the `bg-bg-1` / `text-accent` token names above directly.
+   */
+  --color-background: var(--bg-1);
+  --color-foreground: var(--text-1);
+  --color-card: var(--bg-2);
+  --color-card-foreground: var(--text-1);
+  --color-popover: var(--bg-2);
+  --color-popover-foreground: var(--text-1);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-text);
+  --color-secondary: var(--bg-2);
+  --color-secondary-foreground: var(--text-1);
+  --color-muted: var(--bg-2);
+  --color-muted-foreground: var(--text-2);
+  --color-accent-foreground: var(--accent-text);
+  --color-destructive: var(--live);
+  --color-destructive-foreground: var(--accent-text);
+  --color-input: var(--border-2);
+  --color-ring: var(--accent);
+  --color-success: var(--accent);
+  --color-success-foreground: var(--accent-text);
+  --color-warning: var(--live);
+  --color-warning-foreground: var(--accent-text);
+  --color-info: var(--text-3b);
+  --color-info-foreground: var(--bg-1);
+}
+
+/*
+ * Signal motion keyframes (reused as-is).
+ */
+@keyframes rs-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes rs-shimmer {
+  0% { background-position: -300px 0; }
+  100% { background-position: 300px 0; }
+}
+@keyframes rs-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes rs-toast {
+  from { opacity: 0; transform: translate(-50%, 14px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+@keyframes rs-ring {
+  0% { transform: scale(0.6); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes rs-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/*
+ * Cloud motion. The signature bar growth is an inline
+ * `width/height 0.5s cubic-bezier(0.22,1,0.36,1)` transition, not a keyframe.
+ * tlyBlink runs on the LIVE coral dot; tlyFadeUp is the content-entry; tlyPulse
+ * is the leading-change emphasis.
+ */
+@keyframes tlyFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tlyPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes tlyBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+/* Legacy tick/enter keyframes (components still animate with these). */
+@keyframes tly-tick {
+  from { opacity: 0; transform: translateY(-0.4em); }
+  to { opacity: 1; transform: none; }
+}
+/* Sheet / menu entry pop (PROTOTYPE-MAP-v3): a small scale + fade in. */
+@keyframes tlyPop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes tly-enter {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Tabular numerals for counts / scores / percentages so digits align. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Base styles — flat light app canvas by default; dark re-themes via tokens.
+ */
+@layer base {
+  html {
+    /* Default; the boot script + toggle override per persisted mode. */
+    color-scheme: light;
+  }
+
+  html, body, #root {
+    min-height: 100vh;
+  }
+
+  body {
+    /* Flat app canvas (#EEF0F3 light); dark surfaces re-theme via the variable. */
+    background: var(--bg-0);
+    color: var(--text-1);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Thin custom scrollbars — token-driven, no hard gray boxes. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: var(--border-2);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-3);
+  }
+
+  /* Accent-tinted selection wash (token-driven, re-themes per mode). */
+  ::selection {
+    background: var(--accent-soft);
+  }
+
+  /* Prevent 300ms tap delay on mobile */
+  a, button, [role="button"], input, select, textarea {
+    touch-action: manipulation;
+  }
+}
