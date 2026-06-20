@@ -44,14 +44,22 @@ export function toResultsCsv(
   switch (poll.type) {
     case 'choice':
     case 'multi':
-    case 'quiz':
-    case 'ranking': {
+    case 'quiz': {
       const { options, total } = aggregateChoice(responses, poll)
       const rows: (string | number)[][] = [['option', 'votes', 'percent']]
       for (const o of options) {
         const pct = total ? Math.round((o.count / total) * 100) : 0
         rows.push([o.label, o.count, `${pct}%`])
       }
+      return csvRows(rows)
+    }
+    case 'ranking': {
+      // Ranking has no optionId; aggregate by mean rank across ordered responses.
+      const ranked = aggregateRanking(responses, poll).filter((r) => r.count > 0)
+      const rows: (string | number)[][] = [
+        ['option', 'mean rank', 'times ranked'],
+        ...ranked.map((r) => [r.label, r.meanRank.toFixed(1), r.count]),
+      ]
       return csvRows(rows)
     }
     case 'wordcloud': {

@@ -35,12 +35,8 @@ export interface PollSettings {
   resultsVisible: boolean
   /** One vote per device: reject a second vote from the same deviceId. */
   dedup: boolean
-  /** Let a voter change an existing vote instead of being rejected. */
-  allowVoteChange: boolean
   /** Collect responses anonymously (no display name shown). */
   anonymous: boolean
-  /** Hide all results until the host reveals them. */
-  hideUntilReveal: boolean
   /** Scale/numeric bounds (scale, nps, numeric types). */
   min?: number
   max?: number
@@ -86,8 +82,6 @@ export interface Session {
   lastSeenAt: number
   /** 0 off, 1 collect + show participant names. */
   askNames: number
-  /** 0 off, 1 hold all Q&A questions for host approval (session-wide override). */
-  moderateQa: number
   /** ms when the current poll began; drives the countdown timer. */
   pollStartedAt: number
   [key: string]: unknown

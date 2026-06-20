@@ -57,21 +57,8 @@ export const submitVote: ActionHandler<Env> = async ({ params, tools }) => {
   }
 
   // Dedup by (sessionId, pollId, deviceId). One vote per device per poll.
-  if (settings.dedup) {
-    const prior = recent.find((r) => r.data.pollId === pollId)
-    if (prior) {
-      if (!settings.allowVoteChange) {
-        return { success: false, error: 'You have already voted on this poll' }
-      }
-      // Change-vote: replace the answer fields on the existing row.
-      const updated = await tools.update<Response>('responses', prior.recordId, {
-        ...prior.data,
-        ...answer,
-        createdAt: Date.now(),
-      })
-      if (!updated.success) return updated
-      return { success: true, data: { recordId: prior.recordId, changed: true } }
-    }
+  if (settings.dedup && recent.some((r) => r.data.pollId === pollId)) {
+    return { success: false, error: 'You have already voted on this poll' }
   }
 
   return tools.create<Response>('responses', {

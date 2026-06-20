@@ -15,7 +15,7 @@ export interface AiTheme {
 }
 
 /** Per-poll summary status held by the route page (persists across toggles). */
-export type AiStatus = 'idle' | 'loading' | 'done' | 'empty'
+export type AiStatus = 'idle' | 'loading' | 'done' | 'empty' | 'error'
 
 export interface AiSummaryPanelProps {
   status: AiStatus
@@ -47,6 +47,7 @@ export function AiSummaryPanel({ status, themes, total, error, onRun }: AiSummar
             Not enough responses yet. Once a handful more come in, you can group them into themes.
           </p>
         )}
+        {status === 'error' && <ErrorState onRun={onRun} error={error} />}
         {status === 'done' && <Done themes={themes} total={total} onRun={onRun} error={error} />}
       </div>
     </aside>
@@ -56,7 +57,7 @@ export function AiSummaryPanel({ status, themes, total, error, onRun }: AiSummar
 /* The small blue "AI" badge that marks every AI affordance. */
 function AiBadge() {
   return (
-    <span className="rounded-[3px] bg-[#1e86f0] px-1 py-px font-mono text-[9px] font-bold text-white">AI</span>
+    <span className="rounded-[3px] bg-accent px-1 py-px font-mono text-[9px] font-bold text-white">AI</span>
   )
 }
 
@@ -71,7 +72,7 @@ function Idle({ onRun, error }: { onRun: () => void; error: string | null }) {
         type="button"
         data-testid="ai-summarize-run"
         onClick={onRun}
-        className="mt-4 w-full rounded-[11px] bg-accent py-3 text-center text-[14px] font-bold text-accent-text transition-colors hover:bg-[#3d9bfa]"
+        className="mt-4 w-full rounded-[11px] bg-accent py-3 text-center text-[14px] font-bold text-accent-text transition-colors hover:bg-accent-hover"
       >
         Summarize now
       </button>
@@ -94,6 +95,23 @@ function Loading() {
         aria-hidden
       />
       <p className="mt-4 text-[13.5px] text-text-3b">Grouping responses</p>
+    </div>
+  )
+}
+
+/* Error: a short failure message + a Try again that re-runs the summary. */
+function ErrorState({ onRun, error }: { onRun: () => void; error: string | null }) {
+  return (
+    <div>
+      <p className="text-[13.5px] leading-[1.55] text-live">{error ?? 'AI request failed.'}</p>
+      <button
+        type="button"
+        data-testid="ai-summarize-retry"
+        onClick={onRun}
+        className="mt-3 text-[12.5px] font-semibold text-accent transition-colors hover:underline"
+      >
+        Try again
+      </button>
     </div>
   )
 }

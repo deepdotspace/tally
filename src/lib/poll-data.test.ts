@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { timerRemaining } from './poll-data'
+import { timerRemaining, sessionActive } from './poll-data'
+import { config } from '../config'
 import type { Poll, Session, PollSettings } from '../types'
 
 /*
@@ -26,7 +27,6 @@ function makeSession(over: Partial<Session> = {}): Session {
     closedAt: 0,
     lastSeenAt: NOW,
     askNames: 0,
-    moderateQa: 0,
     pollStartedAt: NOW,
     ...over,
   }
@@ -36,9 +36,7 @@ function makePoll(settings: Partial<PollSettings> = {}): Poll {
   const base: PollSettings = {
     resultsVisible: true,
     dedup: true,
-    allowVoteChange: false,
     anonymous: true,
-    hideUntilReveal: false,
   }
   return {
     title: 'Q',
@@ -101,5 +99,32 @@ describe('timerRemaining', () => {
 
   it('returns null when the poll is missing', () => {
     expect(timerRemaining(makeSession(), null)).toBeNull()
+  })
+})
+
+describe('sessionActive', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(NOW)
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('is true for a fresh live session', () => {
+    expect(sessionActive(makeSession({ state: 'live', lastSeenAt: NOW }))).toBe(true)
+  })
+
+  it('is false when the last heartbeat is older than the active timeout', () => {
+    const stale = makeSession({ state: 'live', lastSeenAt: NOW - config.session.activeTimeoutMs - 1 })
+    expect(sessionActive(stale)).toBe(false)
+  })
+
+  it('is false for a closed session', () => {
+    expect(sessionActive(makeSession({ state: 'closed', lastSeenAt: NOW }))).toBe(false)
+  })
+
+  it('is false for a null session', () => {
+    expect(sessionActive(null)).toBe(false)
   })
 })

@@ -14,7 +14,7 @@
 import { useParams } from 'react-router-dom'
 import { useQuery } from 'deepspace'
 import { ResultsView } from '../../components/results'
-import { useSessionByCode, usePoll, useResponses, useUpvotes, NO_MATCH } from '../../lib/poll-data'
+import { useSessionByCode, usePoll, useResponses, useUpvotes, resultsVisibleToVoters, sessionActive, NO_MATCH } from '../../lib/poll-data'
 import type { Response } from '../../types'
 
 export default function ResultsPermalinkPage() {
@@ -42,16 +42,17 @@ export default function ResultsPermalinkPage() {
     )
   }
 
+  // A stale (abandoned) or closed session is no longer live: show an ended state.
+  if (!sessionActive(session)) {
+    return <PermalinkShell host={host}>This session has ended.</PermalinkShell>
+  }
+
   if (!poll || pollStatus === 'loading') {
     return <PermalinkShell host={host}>Waiting for the question.</PermalinkShell>
   }
 
-  // Same gate a viewer gets: hidden until reveal unless the host has revealed,
-  // and never shown when the poll hides results from the audience.
-  const settings = poll.settings
-  const visible =
-    settings.resultsVisible !== false &&
-    (!settings.hideUntilReveal || (session.resultsRevealed ?? 0) > 0)
+  // Same gate a voter gets: honor revealMode (manual / onClose / never) + the host reveal flag.
+  const visible = resultsVisibleToVoters(session, poll)
 
   return (
     <Page host={host}>

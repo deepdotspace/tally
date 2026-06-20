@@ -126,14 +126,13 @@ export default function DeckDetailPage() {
         try {
           await polls.put(q.id, { settings: { ...poll.settings, moderated: next } })
         } catch {
-          // A failed write-back is non-fatal: moderateQa still gates the session.
+          // A failed write-back is non-fatal: the poll keeps its saved moderation flag.
         }
       }
     }
     const res = await callAction<ActionData>('createSession', {
       deckId: id,
       askNames: opts.askNames,
-      moderateQa: opts.moderateQa,
     })
     setBusy(false)
     if (!res.success) {

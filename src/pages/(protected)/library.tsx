@@ -97,14 +97,13 @@ export default function LibraryPage() {
           const poll = pollById.get(q.id)
           if (poll) await pollMut.put(q.id, { settings: { ...poll.settings, moderated: next } })
         } catch {
-          // A failed write-back is non-fatal: moderateQa still gates the session.
+          // A failed write-back is non-fatal: the poll keeps its saved moderation flag.
         }
       }
     }
     const res = await callAction('createSession', {
       deckId: setupDeckId,
       askNames: opts.askNames,
-      moderateQa: opts.moderateQa,
     })
     if (!res.success) {
       setGoingLive(false)

@@ -57,7 +57,6 @@ export const createSession: ActionHandler<Env> = async ({ userId, params, tools 
   const deckId = String(params.deckId ?? '')
   if (!pollId && !deckId) return { success: false, error: 'pollId or deckId required' }
   const askNames = params.askNames === 1 || params.askNames === true ? 1 : 0
-  const moderateQa = params.moderateQa === 1 || params.moderateQa === true ? 1 : 0
 
   // For a deck, start on its first poll so voters see a question immediately.
   // `name` is snapshotted now for the History label (deck title, else poll question).
@@ -102,7 +101,6 @@ export const createSession: ActionHandler<Env> = async ({ userId, params, tools 
     closedAt: 0,
     lastSeenAt: Date.now(),
     askNames,
-    moderateQa,
     pollStartedAt: Date.now(),
   })
 }
@@ -290,11 +288,37 @@ export const setResponseApproved: ActionHandler<Env> = async ({ userId, params, 
   return patchRecord<Response>(tools, 'responses', responseId, { approved })
 }
 
-/** Toggle session-wide Q&A moderation live (the presenter Moderate panel switch). */
-export const setSessionModeration: ActionHandler<Env> = async ({ userId, params, tools }) => {
+/**
+ * Toggle Q&A moderation live for the session's current poll (the presenter
+ * Moderate panel switch). Writes the single source, poll.settings.moderated.
+ * Turning it OFF also approves this poll's held questions so nothing is stranded.
+ */
+export const setPollModeration: ActionHandler<Env> = async ({ userId, params, tools }) => {
   const sessionId = String(params.sessionId ?? '')
   if (!sessionId) return { success: false, error: 'sessionId required' }
-  if (!(await loadHostSession(tools, sessionId, userId))) return { success: false, error: 'Forbidden' }
-  const moderateQa = params.moderateQa === 1 || params.moderateQa === true ? 1 : 0
-  return patchRecord<Session>(tools, 'sessions', sessionId, { moderateQa })
+  const session = await loadHostSession(tools, sessionId, userId)
+  if (!session) return { success: false, error: 'Forbidden' }
+
+  const pollId = session.currentPollId || session.pollId
+  if (!pollId) return { success: false, error: 'No current poll' }
+  const poll = unwrap<Poll>(await tools.get('polls', pollId))
+  if (!poll) return { success: false, error: 'Poll not found' }
+
+  const moderated = params.moderated === true || params.moderated === 1
+  const patched = await patchRecord<Poll>(tools, 'polls', pollId, {
+    settings: { ...poll.settings, moderated },
+  })
+  if (!patched.success) return patched
+
+  // Releasing moderation: approve this poll's still-pending questions.
+  if (!moderated) {
+    const rows = await queryRecords<Response>(tools, 'responses', { where: { sessionId, pollId } })
+    for (const row of rows) {
+      if (row.data.approved === 0 && row.data.text.trim() !== '') {
+        const updated = await patchRecord<Response>(tools, 'responses', row.recordId, { approved: 1 })
+        if (!updated.success) return updated
+      }
+    }
+  }
+  return patched
 }

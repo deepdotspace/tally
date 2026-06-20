@@ -115,10 +115,10 @@ export default function PresentCodePage() {
     void callAction('setResponseApproved', { sessionId, responseId, approved })
   }
 
-  // Flip session-wide hold-for-review live from the presenter Moderate panel.
+  // Flip hold-for-review live for the current poll from the presenter Moderate panel.
   function toggleModeration(on: boolean) {
     if (!sessionId) return
-    void callAction('setSessionModeration', { sessionId, moderateQa: on ? 1 : 0 })
+    void callAction('setPollModeration', { sessionId, moderated: on })
   }
 
   // Summarize this poll's text answers, billed to the host. Caps to 5 themes,
@@ -131,11 +131,17 @@ export default function PresentCodePage() {
     )
     if (!res.success || !res.data) {
       // "Not enough responses" is the empty state; anything else is a real error.
+      // A failed refresh keeps any prior themes/total so a good result is not wiped.
       const empty = (res.error ?? '').toLowerCase().includes('not enough')
-      setAiByPoll((m) => ({
-        ...m,
-        [pollId]: { ...AI_IDLE, status: empty ? 'empty' : 'idle', error: empty ? null : res.error ?? 'AI request failed' },
-      }))
+      setAiByPoll((m) => {
+        const prev = m[pollId] ?? AI_IDLE
+        return {
+          ...m,
+          [pollId]: empty
+            ? { ...AI_IDLE, status: 'empty' }
+            : { ...prev, status: 'error', error: res.error ?? 'AI request failed' },
+        }
+      })
       return
     }
     const themes = res.data.themes.slice(0, 5)
@@ -192,7 +198,7 @@ export default function PresentCodePage() {
         locked={locked}
         panel={panel}
         moderated={moderated}
-        moderationOn={(session.moderateQa ?? 0) === 1}
+        moderationOn={poll.settings.moderated === true}
         pendingCount={pendingCount}
         ai={ai}
         questionIndex={questionIndex}

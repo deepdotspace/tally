@@ -9,7 +9,7 @@ import {
   closeSession,
   heartbeatSession,
   setResponseApproved,
-  setSessionModeration,
+  setPollModeration,
   reorderDeck,
   cloneDeck,
 } from './sessions'
@@ -32,8 +32,8 @@ export const actions: Record<string, ActionHandler<Env>> = {
   cloneDeck,
   // Q&A moderation: host approves/hides a held response (approve-before-show)
   setResponseApproved,
-  // Q&A moderation: flip session-wide hold-for-review live from the presenter
-  setSessionModeration,
+  // Q&A moderation: flip the current poll's hold-for-review live from the presenter
+  setPollModeration,
 
   // Voting (authoritative dedup + rate-limit)
   submitVote,

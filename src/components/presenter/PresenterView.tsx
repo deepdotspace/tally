@@ -338,7 +338,7 @@ function CtlButton({
 /* The small blue "AI" badge that marks the AI Summary control. */
 function AiBadge() {
   return (
-    <span className="rounded-[3px] bg-[#1e86f0] px-1 py-px font-mono text-[9px] font-bold text-white">AI</span>
+    <span className="rounded-[3px] bg-accent px-1 py-px font-mono text-[9px] font-bold text-white">AI</span>
   )
 }
 

@@ -19,8 +19,6 @@ export interface SetupQaPoll {
 /** The host's choices, handed to the parent on Go live. */
 export interface GoLiveOptions {
   askNames: 0 | 1
-  /** Session-wide: 1 when any Q&A poll is held for review. */
-  moderateQa: 0 | 1
   /** Per-Q&A poll moderation, to write back onto each poll. */
   modByPoll: Record<string, boolean>
 }
@@ -42,8 +40,7 @@ export function StartSessionSheet({ deckName, pollCount, qaPolls, busy, onGoLive
   )
 
   function goLive() {
-    const moderateQa = qaPolls.some((q) => mod[q.id]) ? 1 : 0
-    onGoLive({ askNames: nameOn ? 1 : 0, moderateQa, modByPoll: mod })
+    onGoLive({ askNames: nameOn ? 1 : 0, modByPoll: mod })
   }
 
   return (

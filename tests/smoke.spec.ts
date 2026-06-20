@@ -14,7 +14,7 @@ async function waitForRoot(page: import('@playwright/test').Page) {
 test.describe('Smoke tests', () => {
   test('landing loads without JS errors', async ({ page }) => {
     const errors = captureConsoleErrors(page)
-    // '/' redirects to '/home' (the public landing).
+    // '/' renders the public landing ('/home' redirects to '/').
     await page.goto('/')
     await waitForRoot(page)
     // The landing is lazy-loaded behind the auth-boot gate; the CTA is a motion

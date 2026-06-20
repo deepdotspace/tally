@@ -62,9 +62,7 @@ export const config = {
   defaults: {
     resultsVisible: true,
     dedup: true,
-    allowVoteChange: false,
     anonymous: true,
-    hideUntilReveal: false,
     moderated: false,
     revealMode: 'manual',
   } satisfies PollSettings,

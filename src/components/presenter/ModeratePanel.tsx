@@ -139,7 +139,7 @@ function PendingCard({
           type="button"
           data-testid="moderate-approve"
           onClick={onApprove}
-          className="flex-1 rounded-[9px] bg-accent py-2 text-[13px] font-bold text-accent-text transition-colors hover:bg-[#3d9bfa]"
+          className="flex-1 rounded-[9px] bg-accent py-2 text-[13px] font-bold text-accent-text transition-colors hover:bg-accent-hover"
         >
           Approve
         </button>

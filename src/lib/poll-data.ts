@@ -38,9 +38,9 @@ export function sessionActive(s: Session | null): boolean {
   return !!s && s.state === 'live' && Date.now() - (s.lastSeenAt || 0) < config.session.activeTimeoutMs
 }
 
-/** Whether Q&A questions need host approval before showing: per-poll setting OR the session-wide flag. */
-export function isModerated(session: Session | null, poll: Poll | null): boolean {
-  return session?.moderateQa === 1 || poll?.settings.moderated === true
+/** Whether Q&A questions need host approval before showing: the current poll's per-poll setting. */
+export function isModerated(_session: Session | null, poll: Poll | null): boolean {
+  return poll?.settings.moderated === true
 }
 
 /** Seconds left on the poll's countdown, or null when no timer is set. */
