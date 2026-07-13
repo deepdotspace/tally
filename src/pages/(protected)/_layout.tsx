@@ -9,7 +9,7 @@
  */
 
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { AuthGate, useUser } from 'deepspace'
+import { AuthGate, useUser, signOut } from 'deepspace'
 import { AppShell, Sidebar } from '../../components/shell'
 import type { SidebarNavItem } from '../../components/shell'
 import { useLibrary, useClosedSessions } from '../../lib/library-data'
@@ -46,8 +46,10 @@ function CreatorShell() {
           onNewPoll={() => navigate('/build')}
           onVoiceNew={() => navigate('/voice')}
           navItems={navItems}
-          accountName={user?.name || user?.email}
+          accountName={user?.name}
+          accountEmail={user?.email}
           accountImageUrl={user?.imageUrl}
+          onSignOut={() => signOut()}
         />
       }
     >

@@ -6,6 +6,9 @@ dist
 .worker-bundle.js
 *.tgz
 
+# macOS
+.DS_Store
+
 # Founder coordination wiki — local-only build brain, never committed
 docs/
 

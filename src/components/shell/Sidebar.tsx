@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { ChevronsUpDown, LogOut } from 'lucide-react'
 
 import { TALLY } from '../../themes'
 import { MicGlyph } from './MicGlyph'
@@ -27,7 +28,10 @@ export interface SidebarProps {
   onVoiceNew?: () => void
   navItems: SidebarNavItem[]
   accountName?: string
+  accountEmail?: string
   accountImageUrl?: string
+  /** Signs the user out; the account footer surfaces it as "Log out". */
+  onSignOut?: () => void
 }
 
 export function Sidebar({
@@ -36,9 +40,10 @@ export function Sidebar({
   onVoiceNew,
   navItems,
   accountName,
+  accountEmail,
   accountImageUrl,
+  onSignOut,
 }: SidebarProps) {
-  const initials = (accountName?.[0] ?? 'U').toUpperCase()
   return (
     <aside
       className="flex h-full w-[232px] flex-none flex-col border-r border-border bg-bg-2 px-[14px] py-[18px]"
@@ -85,8 +90,89 @@ export function Sidebar({
         ))}
       </nav>
 
-      {/* Account footer. */}
-      <div className="mt-auto flex items-center gap-2.5 border-t border-[var(--bg-0)] px-2 pt-2.5">
+      {/* Account footer: opens a menu with the signed-in identity + Log out. */}
+      <AccountMenu
+        accountName={accountName}
+        accountEmail={accountEmail}
+        accountImageUrl={accountImageUrl}
+        onSignOut={onSignOut}
+      />
+    </aside>
+  )
+}
+
+/*
+ * Account footer button that opens a small menu above itself with the signed-in
+ * identity and a Log out action. Closes on outside-click or Escape. signOut is
+ * passed in so the Sidebar stays a pure-layout component.
+ */
+function AccountMenu({
+  accountName,
+  accountEmail,
+  accountImageUrl,
+  onSignOut,
+}: {
+  accountName?: string
+  accountEmail?: string
+  accountImageUrl?: string
+  onSignOut?: () => void
+}) {
+  const [open, setOpen] = React.useState(false)
+  const wrapRef = React.useRef<HTMLDivElement>(null)
+
+  const label = accountName || accountEmail || 'Account'
+  const initials = label[0]!.toUpperCase()
+
+  React.useEffect(() => {
+    if (!open) return
+    function onPointerDown(e: MouseEvent) {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
+
+  return (
+    <div ref={wrapRef} className="relative mt-auto border-t border-[var(--bg-0)] pt-2.5">
+      {open && (
+        <div
+          role="menu"
+          className="absolute inset-x-0 bottom-full mb-1.5 overflow-hidden rounded-[12px] border border-border bg-bg-2 p-1.5 shadow-lg"
+        >
+          <div className="px-2.5 py-1.5">
+            <p className="truncate text-[13px] font-semibold text-text-1">{accountName || 'Account'}</p>
+            {accountEmail && <p className="truncate text-[11px] text-text-3">{accountEmail}</p>}
+          </div>
+          <div className="my-1 h-px bg-border" aria-hidden />
+          <button
+            role="menuitem"
+            type="button"
+            onClick={() => {
+              setOpen(false)
+              onSignOut?.()
+            }}
+            className="flex w-full items-center gap-2.5 rounded-[9px] px-2.5 py-2 text-left text-[13px] font-medium text-text-1 transition-colors hover:bg-bg-muted"
+          >
+            <LogOut aria-hidden className="h-[15px] w-[15px] flex-none text-text-3" />
+            Log out
+          </button>
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="flex w-full items-center gap-2.5 rounded-[11px] px-2 py-2 text-left transition-colors hover:bg-bg-muted"
+      >
         {accountImageUrl ? (
           <img
             src={accountImageUrl}
@@ -104,12 +190,13 @@ export function Sidebar({
         )}
         <span className="flex min-w-0 flex-1 flex-col">
           <span data-testid="sidebar-account-name" className="truncate text-[13px] font-semibold text-text-1">
-            {accountName || 'Account'}
+            {label}
           </span>
           <span className="text-[11px] text-text-3">Free plan</span>
         </span>
-      </div>
-    </aside>
+        <ChevronsUpDown aria-hidden className="h-4 w-4 flex-none text-text-3" />
+      </button>
+    </div>
   )
 }
 
