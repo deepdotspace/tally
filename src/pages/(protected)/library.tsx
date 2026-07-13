@@ -179,7 +179,12 @@ export default function LibraryPage() {
 
       {/* Decks. */}
       <section className="mt-9">
-        <Eyebrow className="text-[11px] tracking-[0.07em]">Decks</Eyebrow>
+        <Eyebrow className="text-[11px] tracking-[0.07em]">
+          Decks{' '}
+          <span className="font-normal normal-case tracking-normal text-text-4">
+            (a collection of individual polls)
+          </span>
+        </Eyebrow>
         {decks.length === 0 ? (
           <p className="mt-4 rounded-[16px] border border-dashed border-border-strong px-6 py-10 text-center text-[14px] text-text-3">
             No decks yet. Create one to group polls into a presentation.
