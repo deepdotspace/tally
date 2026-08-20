@@ -1,5 +1,5 @@
 /*
- * Stage D: the typed fallback. A textarea to write the polls out; "Draft polls"
+ * Stage D: the typed fallback. A textarea to write the questions out; "Draft questions"
  * runs the same segmentation on the text. Also the destination when the mic is
  * blocked, in which case an amber mic note explains why.
  */
@@ -15,14 +15,14 @@ export interface TypedStageProps {
 }
 
 const PLACEHOLDER =
-  'Write out each poll, one after another. For example: which feature should we build next, dark mode, search, or offline. Then, how likely are you to recommend us. Then, one word for how today felt.'
+  'Write out each question, one after another. For example: which feature should we build next, dark mode, search, or offline. Then, how likely are you to recommend us. Then, one word for how today felt.'
 
 export function TypedStage({ value, onChange, micNote, busy, onDraft, onRecordInstead }: TypedStageProps) {
   const canDraft = value.trim().length > 3 && !busy
   return (
     <div className="mx-auto w-full max-w-[560px] px-6 py-10">
       <h1 className="text-center font-display text-[26px] font-extrabold tracking-[-0.03em] text-text-1">
-        Write out your polls
+        Write out your questions
       </h1>
 
       {micNote && (
@@ -55,7 +55,7 @@ export function TypedStage({ value, onChange, micNote, busy, onDraft, onRecordIn
           data-testid="voice-draft-typed"
           className="rounded-[11px] bg-accent px-5 py-2.5 text-[14px] font-bold text-accent-text transition-colors hover:bg-accent-hover disabled:opacity-50"
         >
-          {busy ? 'Drafting…' : 'Draft polls'}
+          {busy ? 'Drafting…' : 'Draft questions'}
         </button>
       </div>
     </div>

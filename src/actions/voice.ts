@@ -122,6 +122,6 @@ export const draftPollsFromTranscript: ActionHandler<Env> = async ({ params, env
   const drafts = parseJsonArray(text)
     .map(toDraft)
     .filter((d): d is Draft => d !== null)
-  if (drafts.length === 0) return { success: false, error: 'Could not find any polls in that, try again' }
+  if (drafts.length === 0) return { success: false, error: 'Could not find any questions in that, try again' }
   return { success: true, data: { drafts } }
 }

@@ -9,7 +9,7 @@
 import { useState } from 'react'
 import { PillSwitch } from './PillSwitch'
 
-/** A Q&A poll in the deck, with its saved moderation flag for seeding. */
+/** A Q&A question in the poll, with its saved moderation flag for seeding. */
 export interface SetupQaPoll {
   id: string
   question: string
@@ -57,7 +57,7 @@ export function StartSessionSheet({ deckName, pollCount, qaPolls, busy, onGoLive
         className="w-full max-w-[480px] overflow-hidden rounded-[20px] bg-white animate-tly-pop"
         style={{ boxShadow: '0 40px 120px -30px rgba(10,20,40,0.55)' }}
       >
-        {/* Header: eyebrow, deck title, poll count. */}
+        {/* Header: eyebrow, poll title, question count. */}
         <div className="px-6 pb-[18px] pt-[22px]">
           <p className="font-mono text-[10px] tracking-[0.14em]" style={{ color: '#A6AEB8' }}>
             START SESSION
@@ -66,7 +66,7 @@ export function StartSessionSheet({ deckName, pollCount, qaPolls, busy, onGoLive
             {deckName}
           </h2>
           <p className="tnum mt-1 text-[13.5px]" style={{ color: '#8A929C' }}>
-            {pollCount} {pollCount === 1 ? 'poll' : 'polls'}
+            {pollCount} {pollCount === 1 ? 'question' : 'questions'}
           </p>
         </div>
 

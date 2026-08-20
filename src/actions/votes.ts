@@ -31,7 +31,7 @@ export const submitVote: ActionHandler<Env> = async ({ params, tools }) => {
   if (session.locked) return { success: false, error: 'Voting is locked' }
 
   const poll = unwrap<Poll>(await tools.get('polls', pollId))
-  if (!poll) return { success: false, error: 'Poll not found' }
+  if (!poll) return { success: false, error: 'Question not found' }
   const settings = poll.settings ?? config.defaults
 
   // Rate-limit: cap writes per deviceId per window across this session.

@@ -1,9 +1,9 @@
 /**
- * /library — the authed home (PROTOTYPE-MAP section 3.1). The Decks grid and the
- * flat All-polls list, with New deck / New poll, deck Present, and per-poll
- * Edit / Duplicate / Delete. Data comes from useLibrary (Wave 1); deck/poll CRUD
- * runs through useMutations; presenting opens a session via the createSession
- * action and navigates to the projection once the join code resolves.
+ * /library — the authed home (PROTOTYPE-MAP section 3.1). The Polls grid and the
+ * flat All-questions list, with New poll / New question, poll Present, and
+ * per-question Edit / Duplicate / Delete. Data comes from useLibrary (Wave 1);
+ * poll/question CRUD runs through useMutations; presenting opens a session via
+ * the createSession action and navigates to the projection once the code resolves.
  */
 
 import { useEffect, useMemo, useState } from 'react'
@@ -65,10 +65,10 @@ export default function LibraryPage() {
   async function newDeck() {
     if (!ownerId) return
     try {
-      const id = await deckMut.create({ title: 'Untitled deck', pollIds: [], ownerId })
+      const id = await deckMut.create({ title: 'Untitled poll', pollIds: [], ownerId })
       navigate(`/deck/${id}`)
     } catch (err) {
-      toastError('Could not create the deck', err instanceof Error ? err.message : undefined)
+      toastError('Could not create the poll', err instanceof Error ? err.message : undefined)
     }
   }
 
@@ -122,7 +122,7 @@ export default function LibraryPage() {
     const options: PollOption[] = poll.options.map((o) => ({ ...o, id: newOptionId() }))
     try {
       await pollMut.create({
-        title: poll.title ? `${poll.title} (copy)` : 'Untitled poll',
+        title: poll.title ? `${poll.title} (copy)` : 'Untitled question',
         type: poll.type,
         options,
         settings: { ...poll.settings },
@@ -130,7 +130,7 @@ export default function LibraryPage() {
         order: Date.now(),
         ownerId,
       })
-      success('Poll duplicated')
+      success('Question duplicated')
     } catch (err) {
       toastError('Could not duplicate', err instanceof Error ? err.message : undefined)
     }
@@ -142,7 +142,7 @@ export default function LibraryPage() {
     setConfirmDelete(null)
     try {
       await pollMut.remove(id)
-      success('Poll deleted')
+      success('Question deleted')
     } catch (err) {
       toastError('Could not delete', err instanceof Error ? err.message : undefined)
     }
@@ -156,7 +156,7 @@ export default function LibraryPage() {
           <h1 className="font-display text-[32px] font-extrabold tracking-[-0.03em] text-text-1">Library</h1>
           <p className="mt-1 text-[14.5px] text-text-2">
             <span className="font-bold text-accent">{readyCount}</span>{' '}
-            {readyCount === 1 ? 'deck' : 'decks'} ready to present
+            {readyCount === 1 ? 'poll' : 'polls'} ready to present
           </p>
         </div>
         <div className="ml-auto flex items-center gap-[9px]">
@@ -165,29 +165,29 @@ export default function LibraryPage() {
             onClick={newDeck}
             className="flex items-center gap-1.5 rounded-[10px] border border-border-strong bg-bg-2 px-4 py-2.5 text-[14px] font-semibold text-text-2 transition-colors hover:border-border-7 hover:text-text-1"
           >
-            <span aria-hidden>+</span> New deck
+            <span aria-hidden>+</span> New poll
           </button>
           <button
             type="button"
             onClick={() => navigate('/build')}
             className="flex items-center gap-1.5 rounded-[10px] bg-accent px-4 py-2.5 text-[14px] font-bold text-accent-text transition-colors hover:bg-accent-hover"
           >
-            <span aria-hidden>+</span> New poll
+            <span aria-hidden>+</span> New question
           </button>
         </div>
       </div>
 
-      {/* Decks. */}
+      {/* Polls. */}
       <section className="mt-9">
         <Eyebrow className="text-[11px] tracking-[0.07em]">
-          Decks{' '}
+          Polls{' '}
           <span className="font-normal normal-case tracking-normal text-text-4">
-            (a collection of individual polls)
+            (a collection of questions)
           </span>
         </Eyebrow>
         {decks.length === 0 ? (
           <p className="mt-4 rounded-[16px] border border-dashed border-border-strong px-6 py-10 text-center text-[14px] text-text-3">
-            No decks yet. Create one to group polls into a presentation.
+            No polls yet. Create one to group questions into a presentation.
           </p>
         ) : (
           <div className="mt-3.5 grid grid-cols-[repeat(auto-fill,minmax(290px,1fr))] gap-3.5">
@@ -203,12 +203,12 @@ export default function LibraryPage() {
         )}
       </section>
 
-      {/* All polls. */}
+      {/* All questions. */}
       <section className="mt-9">
-        <Eyebrow className="text-[11px] tracking-[0.07em]">All polls</Eyebrow>
+        <Eyebrow className="text-[11px] tracking-[0.07em]">All questions</Eyebrow>
         <div className="mt-3.5 overflow-hidden rounded-[16px] border border-border bg-bg-2">
           {polls.length === 0 ? (
-            <p className="px-6 py-10 text-center text-[14px] text-text-3">No polls yet. Create your first one.</p>
+            <p className="px-6 py-10 text-center text-[14px] text-text-3">No questions yet. Create your first one.</p>
           ) : (
             polls.map((poll) => (
               <PollRow
@@ -226,7 +226,7 @@ export default function LibraryPage() {
       {/* Start-session setup sheet: configures name + Q&A moderation, then goes live. */}
       {setupDeck && (
         <StartSessionSheet
-          deckName={setupDeck.title || 'Untitled deck'}
+          deckName={setupDeck.title || 'Untitled poll'}
           pollCount={setupDeck.pollIds.length}
           qaPolls={setupQaPolls}
           busy={goingLive}
@@ -251,9 +251,9 @@ export default function LibraryPage() {
       <Dialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete this poll?</DialogTitle>
+            <DialogTitle>Delete this question?</DialogTitle>
             <DialogDescription>
-              {confirmDelete?.question || 'This poll'} will be removed. This cannot be undone.
+              {confirmDelete?.question || 'This question'} will be removed. This cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
@@ -261,7 +261,7 @@ export default function LibraryPage() {
               Cancel
             </Button>
             <Button variant="destructive" onClick={removePoll}>
-              Delete poll
+              Delete question
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -270,7 +270,7 @@ export default function LibraryPage() {
   )
 }
 
-/* Watches a deck's live session and reports its join code once it appears. */
+/* Watches a poll's live session and reports its join code once it appears. */
 function PresentResolver({
   deckId,
   ownerId,

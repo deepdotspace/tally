@@ -5,7 +5,7 @@ import type { Response, Upvote } from '../../types'
 
 /*
  * Moderate panel (PROTOTYPE-MAP-v3 5d) — the host's live Q&A review queue. A
- * right-side dark column shown for moderated Q&A polls. Pending questions
+ * right-side dark column shown for moderated Q&A questions. Pending questions
  * (approved === 0) get Approve / Hide; the already-approved list mirrors what is
  * on the screen. The projection filters to approved === 1 via qaItems, so this
  * panel only drives the queue; it never renders results itself. Lives inside the

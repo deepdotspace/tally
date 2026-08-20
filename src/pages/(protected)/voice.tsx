@@ -1,6 +1,6 @@
 /**
  * /voice — the signature feature (PROTOTYPE-MAP 3.6 + 5.4). Tap once, talk
- * through many polls, and Tally transcribes + drafts them with AI for you to
+ * through many questions, and Tally transcribes + drafts them with AI for you to
  * review and commit. A full in-app screen (the sidebar stays), not a modal.
  *
  * BILLING: both billed calls charge the signed-in creator, never the host.
@@ -36,8 +36,8 @@ import {
 import type { DestChip, RawDraft, VoiceDraft, VoiceStage } from '../../components/voice'
 import type { Deck, Poll } from '../../types'
 
-const MIC_BLOCKED_NOTE = 'Microphone unavailable. Write your polls out below and Tally will draft them the same way.'
-const MIC_EMPTY_NOTE = 'We could not capture any audio. Write your polls out below instead.'
+const MIC_BLOCKED_NOTE = 'Microphone unavailable. Write your questions out below and Tally will draft them the same way.'
+const MIC_EMPTY_NOTE = 'We could not capture any audio. Write your questions out below instead.'
 
 export default function VoicePage() {
   const navigate = useNavigate()
@@ -67,10 +67,10 @@ export default function VoicePage() {
 
   const destChips = useMemo<DestChip[]>(() => {
     const base: DestChip[] = [
-      { id: 'new', label: 'New deck' },
+      { id: 'new', label: 'New poll' },
       { id: 'lib', label: 'Just my library' },
     ]
-    const deckChips = deckRows.map((r) => ({ id: r.id, label: r.deck.title || 'Untitled deck' }))
+    const deckChips = deckRows.map((r) => ({ id: r.id, label: r.deck.title || 'Untitled poll' }))
     return [...base, ...deckChips]
   }, [deckRows])
 
@@ -84,7 +84,7 @@ export default function VoicePage() {
     const res = await callAction<{ drafts: RawDraft[] }>('draftPollsFromTranscript', { transcript: text })
     if (!mounted.current) return
     if (!res.success || !res.data) {
-      toastError('Could not draft polls', res.error)
+      toastError('Could not draft questions', res.error)
       // Keep the user moving: drop them on the typed path with what we have.
       setTyped(text)
       setMicNote(undefined)
@@ -170,7 +170,7 @@ export default function VoicePage() {
     setDrafts((prev) => prev.filter((d) => d.lid !== lid))
   }
 
-  // Commit: create kept polls, attach them to the chosen destination, navigate.
+  // Commit: create kept questions, attach them to the chosen destination, navigate.
   async function commit() {
     if (!ownerId || busy) return
     const kept = drafts.filter((d) => d.keep && d.question.trim())
@@ -183,7 +183,7 @@ export default function VoicePage() {
       }
 
       if (dest === 'lib') {
-        success(`Added ${newIds.length} ${newIds.length === 1 ? 'poll' : 'polls'} to your library`)
+        success(`Added ${newIds.length} ${newIds.length === 1 ? 'question' : 'questions'} to your library`)
         navigate('/library')
         return
       }
@@ -195,11 +195,11 @@ export default function VoicePage() {
         const existing = deckRows.find((r) => r.id === deckId)?.deck
         await decks.put(deckId, { pollIds: [...(existing?.pollIds ?? []), ...newIds] })
       }
-      success(`Added ${newIds.length} ${newIds.length === 1 ? 'poll' : 'polls'}`)
+      success(`Added ${newIds.length} ${newIds.length === 1 ? 'question' : 'questions'}`)
       navigate(`/deck/${deckId}`)
     } catch (err) {
       setBusy(false)
-      toastError('Could not add the polls', err instanceof Error ? err.message : undefined)
+      toastError('Could not add the questions', err instanceof Error ? err.message : undefined)
     }
   }
 
@@ -246,7 +246,7 @@ export default function VoicePage() {
             onRemoveDraft={removeDraft}
             onAddManual={addManual}
             onRecordMore={recordMore}
-            fromDeckName={fromDeck ? fromDeck.title || 'Untitled deck' : null}
+            fromDeckName={fromDeck ? fromDeck.title || 'Untitled poll' : null}
             destChips={destChips}
             dest={dest}
             onDest={setDest}

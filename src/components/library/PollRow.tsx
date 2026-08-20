@@ -1,8 +1,8 @@
 import type { LibraryPollCard } from '../../lib/library-data'
 
 /*
- * Library "All polls" row (PROTOTYPE-MAP section 3.1). A glyph tile, the
- * question with a "type . responses . deck" subline, and Edit / Duplicate /
+ * Library "All questions" row (PROTOTYPE-MAP section 3.1). A glyph tile, the
+ * question with a "type . responses . poll" subline, and Edit / Duplicate /
  * Delete controls. The middle column is the edit affordance; the trailing
  * glyph buttons duplicate and delete.
  */
@@ -14,7 +14,7 @@ export interface PollRowProps {
 }
 
 export function PollRow({ poll, onEdit, onDuplicate, onDelete }: PollRowProps) {
-  // "Multiple choice . 0 votes . Launch deck" — deck name only when a member.
+  // "Multiple choice . 0 votes . Launch" — poll name only when a member.
   const meta = [poll.typeName, poll.responseLabel, ...poll.deckNames.slice(0, 1)].join(' · ')
   return (
     <div className="flex items-center gap-[14px] border-b border-border-2 px-[18px] py-[14px] transition-colors last:border-b-0 hover:bg-bg-subtle">
@@ -30,7 +30,7 @@ export function PollRow({ poll, onEdit, onDuplicate, onDelete }: PollRowProps) {
         onClick={onEdit}
         className="flex min-w-0 flex-1 flex-col items-start text-left"
       >
-        <span className="w-full truncate text-[15px] font-semibold text-text-1">{poll.question || 'Untitled poll'}</span>
+        <span className="w-full truncate text-[15px] font-semibold text-text-1">{poll.question || 'Untitled question'}</span>
         <span className="tnum mt-0.5 truncate text-[12.5px] text-text-3">{meta}</span>
       </button>
 
@@ -45,7 +45,7 @@ export function PollRow({ poll, onEdit, onDuplicate, onDelete }: PollRowProps) {
         type="button"
         onClick={onDuplicate}
         title="Duplicate"
-        aria-label="Duplicate poll"
+        aria-label="Duplicate question"
         className="grid h-8 w-8 flex-none place-content-center rounded-[8px] text-[15px] text-text-3 transition-colors hover:bg-bg-muted"
       >
         ⪉
@@ -54,7 +54,7 @@ export function PollRow({ poll, onEdit, onDuplicate, onDelete }: PollRowProps) {
         type="button"
         onClick={onDelete}
         title="Delete"
-        aria-label="Delete poll"
+        aria-label="Delete question"
         className="grid h-8 w-8 flex-none place-content-center rounded-[8px] text-[16px] text-text-3 transition-colors hover:bg-[var(--danger-bg)] hover:text-[var(--danger)]"
       >
         ×

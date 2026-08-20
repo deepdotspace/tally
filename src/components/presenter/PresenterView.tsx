@@ -218,7 +218,7 @@ function HiddenBody() {
   )
 }
 
-/* Top control bar: deck name + i/n, then Reveal / Lock / Reset / panels / End. */
+/* Top control bar: poll name + i/n, then Reveal / Lock / Reset / panels / End. */
 function ControlBar(props: PresenterViewProps & { hasDeck: boolean }) {
   const { deckName, poll, revealed, locked, panel, questionIndex, questionTotal, hasDeck, busy } = props
   const isQa = poll.type === 'qa'
@@ -383,7 +383,7 @@ function CodeChip({ code }: { code: string }) {
   )
 }
 
-/* Control footer: Prev + a dot per poll (active is a wide accent pill) + Next. */
+/* Control footer: Prev + a dot per question (active is a wide accent pill) + Next. */
 function DeckNav({
   index,
   total,
@@ -408,7 +408,7 @@ function DeckNav({
             <button
               key={i}
               type="button"
-              aria-label={`Go to poll ${i + 1}`}
+              aria-label={`Go to question ${i + 1}`}
               aria-current={active}
               onClick={() => onJump(i)}
               className="h-2 rounded-full transition-all duration-200"

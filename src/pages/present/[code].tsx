@@ -225,7 +225,7 @@ export default function PresentCodePage() {
           void run('reset', 'resetPoll', {})
         }}
         title="Reset all votes?"
-        description="This clears every response for this poll and cannot be undone. The timer restarts."
+        description="This clears every response for this question and cannot be undone. The timer restarts."
         confirmText="Reset votes"
         cancelText="Keep votes"
       />

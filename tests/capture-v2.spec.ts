@@ -98,12 +98,12 @@ test('capture v2 — library, deck, builder, present, vote, session, history', a
     // 1. Make a deck and author three polls of different shapes straight into it.
     // The deck polls also surface in the flat All-polls list, so this populates
     // the Library too (one seeding pass instead of two).
-    await page.getByRole('button', { name: 'New deck' }).click()
+    await page.getByRole('button', { name: 'New poll' }).click()
     await page.waitForURL(/\/deck\//, { timeout: 15_000 })
     const deckUrl = page.url()
     const deckId = deckUrl.split('/deck/')[1].split(/[?#]/)[0]
     const deckTitle = `__v2-${stamp}__ Workshop deck`
-    await page.getByLabel('Deck name').fill(deckTitle)
+    await page.getByLabel('Poll name').fill(deckTitle)
     await page.waitForTimeout(300)
 
     // Author two polls into the deck (each returns to /deck/<id>): an MC (the
@@ -198,7 +198,7 @@ test('capture v2 — voice + landing', async ({ users, browser }) => {
   try {
     // 1. VOICE — idle stage (dark mic stage inset on the light chrome).
     await page.goto('/voice')
-    await expect(page.getByRole('heading', { name: 'Talk through your polls' })).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByRole('heading', { name: 'Talk through your questions' })).toBeVisible({ timeout: 20_000 })
     await page.waitForTimeout(400)
     await page.screenshot({ path: `${DIR}/voice-idle.png`, fullPage: true })
 
@@ -215,7 +215,7 @@ test('capture v2 — voice + landing', async ({ users, browser }) => {
     // Review board: drafting hits the user-billed AI action. It either lands on
     // the review board (best case) or, if the AI call fails, falls back to typed.
     await page.getByTestId('voice-draft-typed').click()
-    const reviewHeading = page.getByRole('heading', { name: 'Review your polls' })
+    const reviewHeading = page.getByRole('heading', { name: 'Review your questions' })
     const reachedReview = await reviewHeading.isVisible({ timeout: 30_000 }).catch(() => false)
     if (reachedReview) {
       await page.waitForTimeout(600)

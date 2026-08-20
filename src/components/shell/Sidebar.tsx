@@ -6,7 +6,7 @@ import { MicGlyph } from './MicGlyph'
 
 /*
  * Creator sidebar (PROTOTYPE-MAP section 2.2). 232px white column with a
- * hairline right border: bar-chart logo + wordmark, a "New poll" + voice mic
+ * hairline right border: bar-chart logo + wordmark, a "New question" + voice mic
  * action row, the Library/History nav with mono counts + active state, and the
  * account footer. The app chrome is light-primary; pure layout from props.
  */
@@ -60,7 +60,7 @@ export function Sidebar({
         </span>
       </button>
 
-      {/* Action row: New poll + a square voice mic button. */}
+      {/* Action row: New question + a square voice mic button. */}
       <div className="mb-4 flex items-center gap-1.5">
         <button
           type="button"
@@ -70,7 +70,7 @@ export function Sidebar({
           <span aria-hidden className="text-[16px] leading-none">
             +
           </span>
-          New poll
+          New question
         </button>
         <button
           type="button"

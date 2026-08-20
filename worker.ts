@@ -16,8 +16,39 @@
 
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { verifyJwt, apiWorkerFetch, platformWorkerFetch, authWorkerFetch } from 'deepspace/worker'
+import {
+  verifyJwt,
+  apiWorkerFetch,
+  platformWorkerFetch,
+  authWorkerFetch,
+  authenticatedRoomRequest,
+  resolveAppRole as sdkResolveAppRole,
+} from 'deepspace/worker'
 import type { JwtVerifierConfig, VerifyResult } from 'deepspace/worker'
+
+/**
+ * Resolve a user's role from the app's canonical `users` collection.
+ *
+ * The SDK's resolveAppRole() addresses the RecordRoom as `app:${DEEPSPACE_APP_ID}`.
+ * This app's room - the one that actually holds the `users` rows this reads - is
+ * keyed `app:${APP_NAME}` (SCOPE_ID in src/constants.ts, what the client mounts
+ * RecordScope on, and every server-side idFromName in this file). Re-keying the
+ * room would orphan live data, so hand the SDK helper the name the room is
+ * actually stored under. The role logic itself is the SDK's, unchanged.
+ *
+ * This deliberately shadows the import so no call site can reach the raw export:
+ * a bare call reads an empty room and returns 'viewer' for everyone but the owner.
+ */
+function resolveAppRole(env: Env, userId: string) {
+  return sdkResolveAppRole(
+    {
+      RECORD_ROOMS: env.RECORD_ROOMS,
+      DEEPSPACE_APP_ID: env.APP_NAME,
+      OWNER_USER_ID: env.OWNER_USER_ID,
+    },
+    userId,
+  )
+}
 import { RecordRoom, YjsRoom, CanvasRoom, PresenceRoom, CronRoom, JobRoom } from 'deepspace/worker'
 import type { Job, JobContext, ActionTools, ActionResult, DOManifest, DOBindings } from 'deepspace/worker'
 import { actions } from './src/actions/index.js'
@@ -83,7 +114,13 @@ export class AppCronRoom extends CronRoom<Env> {
  */
 export class AppJobRoom extends JobRoom<Env> {
   constructor(state: DurableObjectState, env: Env) {
-    super(state, env)
+    super(state, env, {
+      authorizeWrite: async (user) => {
+        if (user.userId.startsWith('anon-')) return false
+        const role = await resolveAppRole(env, user.userId)
+        return role === 'member' || role === 'admin'
+      },
+    })
   }
 
   protected async onJob(job: Job, ctx: JobContext): Promise<unknown> {
@@ -377,19 +414,23 @@ app.all('/api/integrations/:name/:endpoint', async (c) => {
 // WebSocket routes
 // ---------------------------------------------------------------------------
 
-// The DO reads identity (userId, userName, userEmail, userImageUrl, role)
-// off the URL it receives and trusts it. Anything the client put on the URL
-// is stripped on every code path; identity is re-applied only from a
-// verified JWT. Three states: no token = anonymous (the SDK's
-// allowAnonymous flow), invalid token = 401, valid token = JWT identity.
+// The DO reads identity (user id, name, email, image, role) from
+// `x-user-*` request headers and trusts them. `authenticatedRoomRequest`
+// is the only thing that may set those headers: it drops the client's
+// `?token=`, every legacy identity query param, and every inbound
+// `x-user-*` header before writing values taken from a verified JWT, so a
+// client can spoof neither channel. Three states: no token = anonymous
+// (the SDK's allowAnonymous flow), invalid token = 401, valid token = JWT
+// identity. `extraIdentity` supplies the app role for rooms that do not
+// resolve it themselves.
 function wsRoute(
   doNamespace: (env: Env) => DurableObjectNamespace,
-  extraParams?: (auth: VerifyResult) => Record<string, string>,
+  extraIdentity?: (auth: VerifyResult, env: Env) => { role?: string } | Promise<{ role?: string }>,
 ) {
   return async (c: any) => {
     const id = c.req.param('roomId') ?? c.req.param('docId') ?? c.req.param('scopeId')
-    const url = new URL(c.req.url)
-    const token = url.searchParams.get('token')
+    if (!id) return new Response('Not found', { status: 404 })
+    const token = new URL(c.req.url).searchParams.get('token')
 
     let auth: VerifyResult | null = null
     if (token) {
@@ -397,27 +438,15 @@ function wsRoute(
       if (!auth) return new Response('Unauthorized', { status: 401 })
     }
 
-    const doUrl = new URL(c.req.url)
-    doUrl.searchParams.delete('token')
-    for (const k of ['userId', 'userName', 'userEmail', 'userImageUrl', 'role']) {
-      doUrl.searchParams.delete(k)
-    }
-
-    if (auth) {
-      doUrl.searchParams.set('userId', auth.userId)
-      if (auth.claims.name) doUrl.searchParams.set('userName', auth.claims.name)
-      if (auth.claims.email) doUrl.searchParams.set('userEmail', auth.claims.email)
-      if (auth.claims.image) doUrl.searchParams.set('userImageUrl', auth.claims.image)
-      if (extraParams) {
-        for (const [k, v] of Object.entries(extraParams(auth))) {
-          doUrl.searchParams.set(k, v)
-        }
-      }
-    }
+    const roomRequest = authenticatedRoomRequest(
+      c.req.raw,
+      auth,
+      auth ? await extraIdentity?.(auth, c.env) : undefined,
+    )
 
     const ns = doNamespace(c.env)
     const stub = ns.get(ns.idFromName(id))
-    return stub.fetch(new Request(doUrl.toString(), c.req.raw))
+    return stub.fetch(roomRequest)
   }
 }
 
@@ -519,45 +548,36 @@ app.get('/ws/yjs/:docId', async (c) => {
   const role = await resolveDocsYjsRole(c.env, docId, auth.userId)
   if (!role) return new Response('Forbidden', { status: 403 })
 
-  const doUrl = new URL(c.req.url)
-  doUrl.searchParams.set('userId', auth.userId)
-  doUrl.searchParams.set('role', role)
-  doUrl.searchParams.delete('token')
-
   const stub = c.env.YJS_ROOMS.get(c.env.YJS_ROOMS.idFromName(docId))
-  return stub.fetch(new Request(doUrl.toString(), c.req.raw))
+  return stub.fetch(authenticatedRoomRequest(c.req.raw, auth, { role }))
 })
 
 app.get(
   '/ws/canvas/:docId',
   wsRoute(
     (env) => env.CANVAS_ROOMS,
-    () => ({ role: 'member' }),
+    async (auth, env) => ({ role: await resolveAppRole(env, auth.userId) }),
   ),
 )
 
+// Name / email / avatar are carried by `authenticatedRoomRequest` from the
+// verified JWT, so presence needs no extra identity of its own.
 app.get(
   '/ws/presence/:scopeId',
-  wsRoute(
-    (env) => env.PRESENCE_ROOMS,
-    (auth) => ({
-      ...(auth.claims.name ? { userName: auth.claims.name } : {}),
-      ...(auth.claims.email ? { userEmail: auth.claims.email } : {}),
-      ...(auth.claims.image ? { userImageUrl: auth.claims.image } : {}),
-    }),
-  ),
+  wsRoute((env) => env.PRESENCE_ROOMS),
 )
 
 app.get(
   '/ws/cron/:roomId',
   wsRoute(
     (env) => env.CRON_ROOMS,
-    // Authenticated users get write access (trigger / pause / resume).
-    // Anonymous connections fall through with no role and become viewers,
-    // which CronRoom enforces as read-only. Apps that want stricter access
-    // (e.g. owner-only) should replace this with an inline handler that
-    // resolves role from app state — see the /ws/yjs route for the pattern.
-    () => ({ role: 'member' }),
+    // The connection carries the user's real app role, so CronRoom grants
+    // write access (trigger / pause / resume) to members and admins and
+    // holds viewers to read-only. Anonymous connections send no role and
+    // are viewers. Apps that want stricter access (e.g. owner-only) should
+    // replace this with an inline handler that resolves role from app
+    // state — see the /ws/yjs route for the pattern.
+    async (auth, env) => ({ role: await resolveAppRole(env, auth.userId) }),
   ),
 )
 
@@ -714,7 +734,12 @@ app.get('*', async (c) => {
   const response = await c.env.ASSETS.fetch(c.req.raw)
   if (response.status === 404) {
     const url = new URL(c.req.url)
-    url.pathname = '/index.html'
+    // A FILE, not a client route: a miss must 404. Returning the shell here
+    // is HTML parsed as JavaScript, which is a blank page.
+    if (url.pathname.slice(url.pathname.lastIndexOf('/') + 1).includes('.')) {
+      return c.json({ error: 'not_found' }, 404)
+    }
+    url.pathname = '/'
     return c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw))
   }
   return response

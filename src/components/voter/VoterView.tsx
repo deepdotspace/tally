@@ -676,7 +676,7 @@ function LockedState(props: VoterViewProps) {
           Voting is locked
         </h2>
         <p className="mt-2 max-w-[300px] text-[14px] leading-relaxed text-text-3">
-          The host has paused this poll. {showResults ? 'Here are the results so far.' : 'Hang tight for the next question.'}
+          The host has paused this question. {showResults ? 'Here are the results so far.' : 'Hang tight for the next question.'}
         </p>
       </div>
       {showResults && poll && (

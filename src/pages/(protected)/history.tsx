@@ -1,9 +1,9 @@
 /**
  * /history — past sessions you have presented (PROTOTYPE-MAP 3.4). A 940px column
  * of closed-session rows from useClosedSessions: a left date block, the session
- * name, a "N participants . N polls . date" line, then View results / Run again /
- * Delete. "Run again" clones the deck via the cloneDeck action and opens the new
- * deck; Delete confirms through the shared Dialog, then removes the session.
+ * name, a "N participants . N questions . date" line, then View results / Run
+ * again / Delete. "Run again" clones the poll via the cloneDeck action and opens
+ * the new poll; Delete confirms through the shared Dialog, then removes the session.
  */
 
 import { useState } from 'react'
@@ -39,7 +39,7 @@ export default function HistoryPage() {
   const [busy, setBusy] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<ClosedSessionRow | null>(null)
 
-  // Clone the session's deck into a fresh draft and open it (PROTOTYPE-MAP 2.3).
+  // Clone the session's poll into a fresh draft and open it (PROTOTYPE-MAP 2.3).
   async function runAgain(row: ClosedSessionRow) {
     if (busy || !row.deckId) return
     setBusy(true)
@@ -71,7 +71,7 @@ export default function HistoryPage() {
 
       {rows.length === 0 ? (
         <p className="mt-7 rounded-[14px] border border-border bg-bg-2 px-6 py-12 text-center text-[14px] text-text-3">
-          No sessions yet. Present a deck and it will show up here.
+          No sessions yet. Present a poll and it will show up here.
         </p>
       ) : (
         <ul className="mt-7 flex flex-col gap-2.5">
@@ -139,7 +139,7 @@ function SessionRow({
         <p className="truncate text-[16px] font-semibold text-text-1">{row.name || 'Untitled session'}</p>
         <p className="tnum mt-0.5 truncate text-[12.5px] text-text-3">
           {row.participantCount} {row.participantCount === 1 ? 'participant' : 'participants'} · {row.pollCount}{' '}
-          {row.pollCount === 1 ? 'poll' : 'polls'} · {row.dateLabel}
+          {row.pollCount === 1 ? 'question' : 'questions'} · {row.dateLabel}
         </p>
       </button>
 
