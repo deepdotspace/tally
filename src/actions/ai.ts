@@ -128,6 +128,6 @@ export const generatePoll: ActionHandler<Env> = async ({ params, env, callerJwt 
     .map((o) => o.trim())
     .filter(Boolean)
     .slice(0, config.authoring.maxOptions)
-  if (!question || options.length < 2) return { success: false, error: 'Could not generate a poll, try again' }
+  if (!question || options.length < 2) return { success: false, error: 'Could not generate a question, try again' }
   return { success: true, data: { question, options } }
 }

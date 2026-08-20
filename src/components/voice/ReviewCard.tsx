@@ -58,7 +58,7 @@ export function ReviewCard({ draft, onChange, onRemove }: ReviewCardProps) {
           type="button"
           onClick={() => onChange({ ...draft, keep: !draft.keep })}
           aria-pressed={draft.keep}
-          aria-label={draft.keep ? 'Keeping this poll' : 'Skipped'}
+          aria-label={draft.keep ? 'Keeping this question' : 'Skipped'}
           className={cn(
             'grid h-6 w-6 flex-none place-content-center rounded-[7px] border-[1.5px] transition-colors',
             draft.keep ? 'border-accent bg-accent text-white' : 'border-border-6 bg-bg-2 text-transparent',
@@ -83,7 +83,7 @@ export function ReviewCard({ draft, onChange, onRemove }: ReviewCardProps) {
         <button
           type="button"
           onClick={onRemove}
-          aria-label="Remove this poll"
+          aria-label="Remove this question"
           className="ml-auto grid h-[30px] w-[30px] place-content-center rounded-[8px] text-text-4 transition-colors hover:bg-danger-bg hover:text-danger"
         >
           <X className="h-4 w-4" aria-hidden />

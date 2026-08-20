@@ -226,7 +226,7 @@ export interface LibraryPollCard {
   glyph: string
   /** "0 responses" style label (zero until presented; structural identity). */
   responseLabel: string
-  /** Names of the decks this poll belongs to (membership). */
+  /** Names of the polls (decks rows) this question belongs to (membership). */
   deckNames: string[]
 }
 
@@ -258,12 +258,12 @@ export function useLibrary(glyphCount = 5): LibraryData {
       const prev = lastByDeck.get(c.deckId) ?? 0
       if (c.closedAt > prev) lastByDeck.set(c.deckId, c.closedAt)
     }
-    // Deck membership per poll (a poll may sit in several decks).
+    // Poll membership per question (a question may sit in several polls).
     const decksByPoll = new Map<string, string[]>()
     for (const r of deckRows) {
       for (const pid of r.deck.pollIds) {
         const list = decksByPoll.get(pid) ?? []
-        list.push(r.deck.title || 'Untitled deck')
+        list.push(r.deck.title || 'Untitled poll')
         decksByPoll.set(pid, list)
       }
     }
@@ -277,7 +277,7 @@ export function useLibrary(glyphCount = 5): LibraryData {
         .map((p) => typeMeta(p.type).glyph)
       return {
         id: r.id,
-        name: r.deck.title || 'Untitled deck',
+        name: r.deck.title || 'Untitled poll',
         pollCount: r.deck.pollIds.length,
         glyphs,
         status: r.session ? 'ready' : 'draft',

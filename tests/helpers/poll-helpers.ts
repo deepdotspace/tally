@@ -93,8 +93,11 @@ export async function buildPoll(page: Page, opts: BuildOptions): Promise<void> {
 }
 
 /**
- * Create a fresh deck via the "New deck" button and return its id from /deck/<id>.
- * newDeck() no-ops until the user (ownerId) has resolved, and the auth boot can
+ * Create a fresh deck via the "New poll" button and return its id from /deck/<id>.
+ * The UI calls a `decks` row a "poll" and a `polls` row a "question"; the routes,
+ * collections, and testids keep the original names.
+ *
+ * The button no-ops until the user (ownerId) has resolved, and the auth boot can
  * remount the page to "Loading..." mid-click, so retry the click until the URL
  * actually moves to a deck.
  */
@@ -104,7 +107,7 @@ export async function createDeck(page: Page): Promise<string> {
 
   await expect(async () => {
     await settle(page)
-    const newDeck = page.getByRole('button', { name: 'New deck' })
+    const newDeck = page.getByRole('button', { name: 'New poll' })
     await expect(newDeck).toBeVisible({ timeout: 5_000 })
     await newDeck.click()
     await page.waitForURL(/\/deck\//, { timeout: 5_000 })

@@ -1,6 +1,6 @@
 /*
  * How-it-works steps. Three scroll-revealed cards (Ask / Share / Watch), each
- * with its own micro-animation: a typing caret on the new-poll mock, a rippling
+ * with its own micro-animation: a typing caret on the new-question mock, a rippling
  * QR + code, and breathing live bars. Copy and motion match the prototype.
  */
 
@@ -14,7 +14,7 @@ const mono = "'JetBrains Mono', monospace"
 function AskMock({ reduce }: { reduce: boolean }) {
   return (
     <div style={{ background: '#08090C', border: '1px solid #161A20', borderRadius: 13, padding: 15 }}>
-      <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.14em', color: '#5A636E' }}>NEW POLL</div>
+      <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.14em', color: '#5A636E' }}>NEW QUESTION</div>
       <div style={{ fontFamily: display, fontWeight: 700, fontSize: 16, color: '#F2F5F8', marginTop: 8, lineHeight: 1.2 }}>
         Which session after lunch?
         <span className="tly-anim" style={{ display: 'inline-block', width: 2, height: 15, background: '#4FB0FF', marginLeft: 3, verticalAlign: -2, animation: reduce ? 'none' : 'tlyCaret 1.1s step-end infinite' }} />

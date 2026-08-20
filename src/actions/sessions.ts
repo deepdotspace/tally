@@ -64,7 +64,7 @@ export const createSession: ActionHandler<Env> = async ({ userId, params, tools 
   let name = ''
   if (deckId) {
     const deck = unwrap<Deck>(await tools.get('decks', deckId))
-    if (!deck) return { success: false, error: 'Deck not found' }
+    if (!deck) return { success: false, error: 'Poll not found' }
     if (deck.ownerId !== userId) return { success: false, error: 'Forbidden' }
     currentPollId = deck.pollIds[0] ?? ''
     name = deck.title
@@ -115,11 +115,11 @@ export const advanceDeck: ActionHandler<Env> = async ({ userId, params, tools })
   const sessionId = String(params.sessionId ?? '')
   const session = await loadHostSession(tools, sessionId, userId)
   if (!session) return { success: false, error: 'Forbidden' }
-  if (!session.deckId) return { success: false, error: 'Session is not a deck' }
+  if (!session.deckId) return { success: false, error: 'Session is not a poll' }
 
   const deck = unwrap<Deck>(await tools.get('decks', session.deckId))
-  if (!deck) return { success: false, error: 'Deck not found' }
-  if (deck.pollIds.length === 0) return { success: false, error: 'Deck has no polls' }
+  if (!deck) return { success: false, error: 'Poll not found' }
+  if (deck.pollIds.length === 0) return { success: false, error: 'This poll has no questions' }
 
   const cur = deck.pollIds.indexOf(session.currentPollId)
   const direction = params.direction === 'prev' ? 'prev' : 'next'
@@ -154,7 +154,7 @@ export const reorderDeck: ActionHandler<Env> = async ({ userId, params, tools })
     return { success: false, error: 'deckId, fromIndex, and toIndex required' }
   }
   const deck = unwrap<Deck>(await tools.get('decks', deckId))
-  if (!deck) return { success: false, error: 'Deck not found' }
+  if (!deck) return { success: false, error: 'Poll not found' }
   if (deck.ownerId !== userId) return { success: false, error: 'Forbidden' }
 
   const ids = [...deck.pollIds]
@@ -175,7 +175,7 @@ export const cloneDeck: ActionHandler<Env> = async ({ userId, params, tools }) =
   const deckId = String(params.deckId ?? '')
   if (!deckId) return { success: false, error: 'deckId required' }
   const deck = unwrap<Deck>(await tools.get('decks', deckId))
-  if (!deck) return { success: false, error: 'Deck not found' }
+  if (!deck) return { success: false, error: 'Poll not found' }
   if (deck.ownerId !== userId) return { success: false, error: 'Forbidden' }
 
   // Clone polls first (deckId set after the new deck exists), then the deck.
@@ -300,9 +300,9 @@ export const setPollModeration: ActionHandler<Env> = async ({ userId, params, to
   if (!session) return { success: false, error: 'Forbidden' }
 
   const pollId = session.currentPollId || session.pollId
-  if (!pollId) return { success: false, error: 'No current poll' }
+  if (!pollId) return { success: false, error: 'No current question' }
   const poll = unwrap<Poll>(await tools.get('polls', pollId))
-  if (!poll) return { success: false, error: 'Poll not found' }
+  if (!poll) return { success: false, error: 'Question not found' }
 
   const moderated = params.moderated === true || params.moderated === 1
   const patched = await patchRecord<Poll>(tools, 'polls', pollId, {

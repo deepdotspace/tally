@@ -29,10 +29,10 @@ export interface RecordIdleProps {
 export function RecordIdle({ micState, onStart, onToText }: RecordIdleProps) {
   return (
     <div className="mx-auto flex w-full max-w-[560px] flex-col items-center px-6 py-10 text-center">
-      <h1 className="font-display text-[30px] font-extrabold tracking-[-0.03em] text-text-1">Talk through your polls</h1>
+      <h1 className="font-display text-[30px] font-extrabold tracking-[-0.03em] text-text-1">Talk through your questions</h1>
       <p className="mt-3 max-w-[440px] text-[15.5px] leading-[1.55] text-text-2b">
-        Describe every poll you want, one after another. Take your time. When you stop, Tally turns the whole thing
-        into polls you can review.
+        Describe every question you want, one after another. Take your time. When you stop, Tally turns the whole
+        thing into questions you can review.
       </p>
 
       <div className="mt-7 w-full rounded-[20px] bg-[#0A0C0F] px-6 py-11">
@@ -115,7 +115,7 @@ export function Recording({ elapsed, liveText, readLevels, onStop }: RecordingPr
             data-testid="voice-stop"
             className="flex items-center gap-2 rounded-[13px] bg-accent px-5 py-3 text-[14.5px] font-bold text-accent-text transition-colors hover:bg-accent-hover"
           >
-            <Square className="h-3.5 w-3.5 fill-current" aria-hidden /> Done, draft my polls
+            <Square className="h-3.5 w-3.5 fill-current" aria-hidden /> Done, draft my questions
           </button>
         </div>
       </div>

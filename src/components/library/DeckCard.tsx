@@ -2,10 +2,10 @@ import type { LibraryDeckCard } from '../../lib/library-data'
 import { StatusChip } from './StatusChip'
 
 /*
- * Library deck card (PROTOTYPE-MAP section 3.1). White rounded card: a status
- * chip + poll count, the deck name, a row of up to five type-glyph tiles, and a
- * footer with the last-presented label and a "Present" pill. Clicking the card
- * opens the deck; the Present pill opens a session without selecting the card.
+ * Library poll card (PROTOTYPE-MAP section 3.1). White rounded card: a status
+ * chip + question count, the poll name, a row of up to five type-glyph tiles, and
+ * a footer with the last-presented label and a "Present" pill. Clicking the card
+ * opens the poll; the Present pill opens a session without selecting the card.
  */
 export interface DeckCardProps {
   deck: LibraryDeckCard
@@ -27,11 +27,11 @@ export function DeckCard({ deck, onOpen, onPresent }: DeckCardProps) {
       }}
       className="group flex cursor-pointer flex-col rounded-[16px] border border-border bg-bg-2 p-[18px] transition-[border-color,box-shadow] duration-150 hover:border-border-6 hover:shadow-[0_8px_24px_-14px_rgba(20,30,50,0.25)]"
     >
-      {/* Status + poll count. */}
+      {/* Status + question count. */}
       <div className="flex items-center justify-between">
         <StatusChip status={deck.status} />
         <span className="tnum font-mono text-[12px] text-text-4">
-          {deck.pollCount} {deck.pollCount === 1 ? 'poll' : 'polls'}
+          {deck.pollCount} {deck.pollCount === 1 ? 'question' : 'questions'}
         </span>
       </div>
 
@@ -40,7 +40,7 @@ export function DeckCard({ deck, onOpen, onPresent }: DeckCardProps) {
         {deck.name}
       </h3>
 
-      {/* Type-glyph row (first five polls). */}
+      {/* Type-glyph row (first five questions). */}
       {deck.glyphs.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {deck.glyphs.map((g, i) => (

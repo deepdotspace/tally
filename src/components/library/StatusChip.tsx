@@ -1,7 +1,7 @@
 import type { DeckStatus } from '../../lib/library-data'
 
 /*
- * Deck status pill (PROTOTYPE-MAP statusMeta). A deck currently hosting a live
+ * Poll status pill (PROTOTYPE-MAP statusMeta). A poll currently hosting a live
  * session reads "Ready" (accent on accent-tint); otherwise "Draft" (muted on a
  * neutral inset). Status is derived in the data layer, never stored.
  */

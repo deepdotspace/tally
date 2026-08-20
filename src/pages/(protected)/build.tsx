@@ -1,13 +1,15 @@
 /**
- * /build — the poll builder (PROTOTYPE-MAP 3.3). A top bar (back + title +
+ * /build — the question builder (PROTOTYPE-MAP 3.3). A top bar (back + title +
  * Cancel + Save) over a three-column grid: a vertical list of the nine question
  * types, the question + options editor (with per-type settings), and a dark
  * audience-phone live preview. The preview hides on narrow widths. All nine
  * types are creatable; option types (choice/multi/ranking/quiz) take an options
  * editor, quiz marks one correct, and scale/nps/numeric carry their bounds.
  *
- * Entry context comes from the query string: `?deck=<id>` adds the saved poll to
- * that deck (and Cancel/Save return to it); `?poll=<id>` loads a poll to edit.
+ * Entry context comes from the query string: `?deck=<id>` adds the saved question
+ * to that poll (and Cancel/Save return to it); `?poll=<id>` loads a question to
+ * edit. The query keys and collection names keep the old vocabulary; only the UI
+ * copy calls a `decks` row a poll and a `polls` row a question.
  */
 
 import { useEffect, useMemo, useState } from 'react'
@@ -134,9 +136,9 @@ export default function BuildPage() {
   const quizValid = type !== 'quiz' || filledOptions.some((o) => o.correct === true)
   const canSave = title.trim().length > 0 && optionsValid && quizValid && !saving && !!ownerId
 
-  // Cancel/Save return to the deck this poll belongs to, else the library.
+  // Cancel/Save return to the poll this question belongs to, else the library.
   const backTarget = deckId ? `/deck/${deckId}` : '/library'
-  const backLabel = deckId ? 'Deck' : 'Library'
+  const backLabel = deckId ? 'Poll' : 'Library'
 
   async function handleSave() {
     if (!canSave) return
@@ -157,23 +159,23 @@ export default function BuildPage() {
     try {
       if (editId && existing) {
         await polls.put(editId, payload)
-        success('Poll saved')
+        success('Question saved')
       } else {
         const id = await polls.create(payload)
         // A new poll authored from a deck joins that deck's running order.
         if (deckId && targetDeck) {
           await decks.put(deckId, { pollIds: [...targetDeck.pollIds, id] })
         }
-        success('Poll created')
+        success('Question created')
       }
       navigate(backTarget)
     } catch (err) {
       setSaving(false)
-      toastError('Could not save the poll', err instanceof Error ? err.message : undefined)
+      toastError('Could not save the question', err instanceof Error ? err.message : undefined)
     }
   }
 
-  const title16 = editId ? 'Edit poll' : 'New poll'
+  const title16 = editId ? 'Edit question' : 'New question'
   const hasOpts = usesOptions(type)
 
   return (
@@ -211,7 +213,7 @@ export default function BuildPage() {
 
       {locked && (
         <p className="flex-none border-b border-border bg-bg-2 px-6 py-2 text-[12.5px] text-text-3">
-          This poll has a live session. Close it to change the question or options.
+          This question has a live session. Close it to change the question or options.
         </p>
       )}
 
@@ -278,7 +280,7 @@ export default function BuildPage() {
               </div>
             )}
 
-            {/* Per-poll settings: reveal mode, results, dedup, timer, moderation. */}
+            {/* Per-question settings: reveal mode, results, dedup, timer, moderation. */}
             <div className="flex flex-col gap-2.5">
               <Eyebrow>Settings</Eyebrow>
               <div className="flex flex-col divide-y divide-border-2 rounded-[12px] border border-border bg-bg-2">
@@ -329,7 +331,7 @@ export default function BuildPage() {
             </div>
           </div>
           <p className="mt-3 text-center text-[12px] text-text-3">
-            A {captionTypeName(type)} poll, as it appears on a voter's phone.
+            A {captionTypeName(type)} question, as it appears on a voter's phone.
           </p>
         </aside>
       </div>
@@ -417,7 +419,7 @@ type RevealMode = NonNullable<PollSettings['revealMode']>
 
 const REVEAL_MODES: { id: RevealMode; label: string }[] = [
   { id: 'manual', label: 'Manual reveal' },
-  { id: 'onClose', label: 'When the poll closes' },
+  { id: 'onClose', label: 'When the question closes' },
   { id: 'never', label: 'Never show voters' },
 ]
 
@@ -427,7 +429,7 @@ function RevealRow({ value, onChange }: { value: RevealMode; onChange: (v: Revea
     <div className="flex flex-col gap-2.5 px-4 py-3">
       <div className="min-w-0">
         <p className="text-[13.5px] font-semibold text-text-1">When voters see results</p>
-        <p className="text-[12px] text-text-3">Reveal on your cue, automatically when the poll closes, or keep results on the projector only.</p>
+        <p className="text-[12px] text-text-3">Reveal on your cue, automatically when the question closes, or keep results on the projector only.</p>
       </div>
       <div className="inline-flex flex-wrap gap-0.5 rounded-[var(--radius)] border border-border bg-bg-1 p-0.5">
         {REVEAL_MODES.map((m) => (
@@ -450,7 +452,7 @@ function RevealRow({ value, onChange }: { value: RevealMode; onChange: (v: Revea
   )
 }
 
-/* Optional per-poll countdown in seconds; 0 (or empty) turns it off. */
+/* Optional per-question countdown in seconds; 0 (or empty) turns it off. */
 function TimerRow({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="flex items-center justify-between gap-4 px-4 py-3">

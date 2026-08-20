@@ -8,8 +8,8 @@ export function ProcessingStage() {
         style={{ animation: 'tlySpin 0.8s linear infinite' }}
         aria-hidden
       />
-      <h2 className="mt-6 font-display text-[17px] font-bold text-text-1">Finding your polls</h2>
-      <p className="mt-1.5 text-[13.5px] text-text-3">Splitting your recording into separate polls</p>
+      <h2 className="mt-6 font-display text-[17px] font-bold text-text-1">Finding your questions</h2>
+      <p className="mt-1.5 text-[13.5px] text-text-3">Splitting your recording into separate questions</p>
     </div>
   )
 }

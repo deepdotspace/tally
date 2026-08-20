@@ -29,7 +29,7 @@ export function AiGenerate({ type, onResult }: AiGenerateProps) {
     const res = await callAction<{ question: string; options: string[] }>('generatePoll', { topic: t, type })
     setBusy(false)
     if (!res.success || !res.data) {
-      setError(res.error ?? 'Could not generate a poll')
+      setError(res.error ?? 'Could not generate a question')
       return
     }
     onResult(res.data)
